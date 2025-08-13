@@ -38,7 +38,7 @@ Suggested reading to get up and running:
 
 Default GitHub Actions workflows are available for the following repository actions:
 
-* `push`: Run for commits or tags pushed to `master` or `main` branches.
+* `push`: Run for commits or tags pushed to `master` or `main` or `develop` branches.
 * `pr-pull`: Run when a Pull Request has been pushed or synchronized.
 * `dispatch`: Run when triggered by the workflow dispatch in GitHub's user interface.
 * `build-project`: Builds the actual project and is triggered by other workflows.
@@ -52,7 +52,7 @@ Successful builds on GitHub Actions will produce build artifacts that can be dow
 
 ### Building a Release
 
-To create a release, an appropriately named tag needs to be pushed to the `main`/`master` branch using semantic versioning (e.g., `12.3.4`, `23.4.5-beta2`). A draft release will be created on the associated repository with generated installer packages or installation programs attached as release artifacts.
+To create a release, an appropriately named tag needs to be pushed to the `main`/`master`/`develop` branch using semantic versioning (e.g., `12.3.4`, `23.4.5-beta2`). A draft release will be created on the associated repository with generated installer packages or installation programs attached as release artifacts.
 
 ## Signing and Notarizing on macOS
 
