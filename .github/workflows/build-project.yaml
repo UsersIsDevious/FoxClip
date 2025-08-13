@@ -290,6 +290,18 @@ jobs:
           config: ${{ needs.check-event.outputs.config }}
           package: ${{ fromJSON(needs.check-event.outputs.package) }}
 
+      - name: Compute Checksums 🔐
+        shell: pwsh
+        run: |
+          # Compute SHA-256 for installer and plugin archive
+          $OutputName = "${{ steps.setup.outputs.pluginName }}-${{ steps.setup.outputs.pluginVersion }}-windows-x64"
+          $Installer = "release/$OutputName-installer.exe"
+          $PluginZip = "release/$OutputName.zip"
+          $InstallerHash = Get-FileHash $Installer -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+          $PluginHash = Get-FileHash $PluginZip -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+          Write-Host "SHA256 ($Installer) = $InstallerHash"
+          Write-Host "SHA256 ($PluginZip) = $PluginHash"
+
       - name: Upload Artifacts 📡
         uses: actions/upload-artifact@v4
         with:
