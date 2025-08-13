@@ -67,6 +67,26 @@ function Package {
     }
     Compress-Archive -Force @CompressArgs
     Log-Group
+
+    if ( -not ( Get-Command makensis.exe -ErrorAction SilentlyContinue ) ) {
+        Log-Group "Installing NSIS..."
+        Invoke-External choco install nsis --no-progress -y
+        Log-Group
+    }
+
+    Log-Group "Creating NSIS installer..."
+    $InstallerScript = Join-Path $ProjectRoot 'installer/windows-installer.nsi'
+    $OutFilePath = Join-Path (Join-Path $ProjectRoot 'release') "${OutputName}-installer.exe"
+    $SourceDir = Join-Path (Join-Path $ProjectRoot 'release') $Configuration
+    $NsisArgs = @(
+        "/DPRODUCT_NAME=${ProductName}"
+        "/DPRODUCT_VERSION=${ProductVersion}"
+        "/DOUTPUT_FILE=${OutFilePath}"
+        "/DSOURCE_DIR=${SourceDir}"
+        $InstallerScript
+    )
+    Invoke-External makensis @NsisArgs
+    Log-Group
 }
 
 Package
