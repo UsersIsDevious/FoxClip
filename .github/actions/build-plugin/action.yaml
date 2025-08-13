@@ -1,4 +1,3 @@
-# yamllint disable rule:document-start rule:line-length rule:comments-indentation
 name: Set up and build plugin
 description: Builds the plugin for specified architecture and build config
 inputs:
