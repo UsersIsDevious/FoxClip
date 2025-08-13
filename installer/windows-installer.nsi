@@ -30,8 +30,8 @@ UninstPage instfiles
 Section "Install"
   ; Plugin binary
   SetOutPath "$INSTDIR\obs-plugins\64bit"
-  File "${SOURCE_DIR}\${PRODUCT_NAME}.dll"
-  File /nonfatal "${SOURCE_DIR}\${PRODUCT_NAME}.pdb"
+  File "${SOURCE_DIR}\${PRODUCT_NAME}\bin\64bit\${PRODUCT_NAME}.dll"
+  File /nonfatal "${SOURCE_DIR}\${PRODUCT_NAME}\bin\64bit\${PRODUCT_NAME}.pdb"
 
   ; Plugin data (リポジトリ直下 data/ から同梱)
   SetOutPath "$INSTDIR\data\obs-plugins\${PRODUCT_NAME}"
