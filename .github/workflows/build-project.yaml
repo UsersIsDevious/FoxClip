@@ -299,6 +299,8 @@ jobs:
           $PluginZip = "release/$OutputName.zip"
           $InstallerHash = Get-FileHash $Installer -Algorithm SHA256 | Select-Object -ExpandProperty Hash
           $PluginHash = Get-FileHash $PluginZip -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+          "$InstallerHash  $(Split-Path $Installer -Leaf)" | Set-Content "$Installer.sha256"
+          "$PluginHash  $(Split-Path $PluginZip -Leaf)" | Set-Content "$PluginZip.sha256"
           Write-Host "SHA256 ($Installer) = $InstallerHash"
           Write-Host "SHA256 ($PluginZip) = $PluginHash"
 
