@@ -35,7 +35,7 @@ Section "Install"
 
   ; Plugin data (リポジトリ直下 data/ から同梱)
   SetOutPath "$INSTDIR\data\obs-plugins\${PRODUCT_NAME}"
-  File /r "data\*.*"
+  File /r "${SOURCE_DIR}\${PRODUCT_NAME}\data\*.*"
 
   WriteUninstaller "$INSTDIR\Uninstall-${PRODUCT_NAME}.exe"
 SectionEnd
