@@ -1,4 +1,5 @@
 !include "MUI2.nsh"
+!include "x64.nsh"          ; 追加: RunningX64 マクロ
 
 !define PLUGIN_NAME "FoxClip"
 !define OBS_SUBDIR "obs-studio"
@@ -7,25 +8,29 @@
 !define OBS_PLUGINS_DATA_SUBDIR "data\obs-plugins"
 ; 既定 InstallDir は後で動的に上書き
 InstallDir "$PROGRAMFILES64\${OBS_SUBDIR}"
-SetRegView 64
 RequestExecutionLevel admin
 Var OBSPath
 
 Function .onInit
+  ; 適切なレジストリビューを選択
+  ${If} ${RunningX64}
+    SetRegView 64
+  ${Else}
+    SetRegView 32
+  ${EndIf}
+
   StrCpy $OBSPath ""
-  ; 1) レジストリ (通常版インストーラ)
+  ; OBS インストールパス探索
   ReadRegStr $OBSPath HKLM "Software\OBS Studio" "Path"
-  ; 2) Microsoft Uninstall キー (将来互換)
   ${If} $OBSPath == ""
     ReadRegStr $OBSPath HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\OBS Studio" "InstallLocation"
   ${EndIf}
-  ; 3) 既定パス候補
   ${If} $OBSPath == ""
     StrCpy $OBSPath "$PROGRAMFILES64\obs-studio"
   ${EndIf}
-  ; obs64.exe が存在するか確認
+
   ${IfNot} ${FileExists} "$OBSPath\bin\64bit\obs64.exe"
-    MessageBox MB_ICONEXCLAMATION "OBS のインストール場所を検出できません。次で手動選択してください。"
+    MessageBox MB_ICONEXCLAMATION "OBS のインストール場所を検出できません。次のダイアログで選択してください。"
     StrCpy $INSTDIR "$PROGRAMFILES64\obs-studio"
   ${Else}
     StrCpy $INSTDIR "$OBSPath"
