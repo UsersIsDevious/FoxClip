@@ -33,13 +33,13 @@
     },
     "platformConfig": {
         "macos": {
-            "bundleId": "com.example.plugintemplate-for-obs"
+            "bundleId": "com.example.foxclip"
         }
     },
-    "name": "plugintemplate-for-obs",
-    "displayName": "Plugin Template for OBS",
+    "name": "foxclip",
+    "displayName": "FoxClip for OBS",
     "version": "1.0.0",
-    "author": "Your Name Here",
-    "website": "https://example.com",
-    "email": "me@example.com"
+    "author": "UsersIsDevious",
+    "website": "https://github.com/UsersIsDevious/FoxClip",
+    "email": "support@uids.jp"
 }
