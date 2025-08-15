@@ -37,9 +37,21 @@ if(ENABLE_QT)
                AUTORCC ON)
 endif()
 
+# ===== plugin-support.c を生成（.in を直接ビルドに入れない）=====
+set(GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+file(MAKE_DIRECTORY "${GEN_DIR}")
+
+set(PLUGIN_SUPPORT_IN
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/infra_shared/support/plugin-support.c.in")
+set(PLUGIN_SUPPORT_OUT "${GEN_DIR}/plugin-support.c")
+
+configure_file("${PLUGIN_SUPPORT_IN}" "${PLUGIN_SUPPORT_OUT}" @ONLY)
+set_source_files_properties("${PLUGIN_SUPPORT_OUT}" PROPERTIES GENERATED TRUE)
+# ===============================================================
+
 target_sources(
   ${CMAKE_PROJECT_NAME}
-  PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/generated/plugin-support.c
+  PRIVATE ${PLUGIN_SUPPORT_OUT}
           src/app/plugin-main.cpp
           src/features/startup_check/app/StartupCheckFacade.cpp
           src/features/startup_check/domain/StartupCheckService.cpp
