@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.28...3.30)
 
-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/common/bootstrap.cmake" NO_POLICY_SCOPE)
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/common/bootstrap.cmake"
+        NO_POLICY_SCOPE)
 
 project(${_name} VERSION ${_version})
 
@@ -26,25 +27,27 @@ if(ENABLE_QT)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Core Qt6::Widgets)
   target_compile_options(
     ${CMAKE_PROJECT_NAME}
-    PRIVATE $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-quoted-include-in-framework-header -Wno-comma>
-  )
+    PRIVATE
+      $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-quoted-include-in-framework-header
+      -Wno-comma>)
   set_target_properties(
     ${CMAKE_PROJECT_NAME}
-    PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON
-  )
+    PROPERTIES AUTOMOC ON
+               AUTOUIC ON
+               AUTORCC ON)
 endif()
 
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE 
-  ${CMAKE_CURRENT_BINARY_DIR}/generated/plugin-support.c
-  src/app/plugin-main.cpp
-  src/features/startup_check/app/StartupCheckFacade.cpp
-  src/features/startup_check/domain/StartupCheckService.cpp
-  src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
-  src/infra_shared/log/ObsLogger.c
-)
+target_sources(
+  ${CMAKE_PROJECT_NAME}
+  PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/generated/plugin-support.c
+          src/app/plugin-main.cpp
+          src/features/startup_check/app/StartupCheckFacade.cpp
+          src/features/startup_check/domain/StartupCheckService.cpp
+          src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
+          src/infra_shared/log/ObsLogger.c)
 
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-  ${CMAKE_CURRENT_BINARY_DIR}/generated
-)
-set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
+target_include_directories(
+  ${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+                                ${CMAKE_CURRENT_BINARY_DIR}/generated)
+set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME
+                             ${_name})
