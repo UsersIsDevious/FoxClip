@@ -4,8 +4,8 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/common/bootstrap.cmake" NO_POLICY_SCO
 
 project(${_name} VERSION ${_version})
 
-option(ENABLE_FRONTEND_API "Use obs-frontend-api for UI functionality" OFF)
-option(ENABLE_QT "Use Qt functionality" OFF)
+option(ENABLE_FRONTEND_API "Use obs-frontend-api for UI functionality" ON)
+option(ENABLE_QT "Use Qt functionality" ON)
 
 include(compilerconfig)
 include(defaults)
@@ -34,6 +34,27 @@ if(ENABLE_QT)
   )
 endif()
 
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.c)
+# .in → .c を生成（ソースツリーには plugin-support.c は存在しない）
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/infra_shared/support/plugin-support.c.in
+  ${CMAKE_CURRENT_BINARY_DIR}/generated/plugin-support.c
+  @ONLY
+)
+
+
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE 
+  ${CMAKE_CURRENT_BINARY_DIR}/generated/plugin-support.c
+  src/app/plugin-main.cpp
+  src/features/startup_check/app/StartupCheckFacade.cpp
+  src/features/startup_check/domain/StartupCheckService.cpp
+  src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
+  src/infra_shared/log/ObsLogger.c
+  )
+
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_BINARY_DIR}/generated
+)
+
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
