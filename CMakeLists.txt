@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.28...3.30)
 
-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/common/bootstrap.cmake"
-        NO_POLICY_SCOPE)
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/common/bootstrap.cmake" NO_POLICY_SCOPE)
 
 project(${_name} VERSION ${_version})
 
@@ -27,22 +26,19 @@ if(ENABLE_QT)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt6::Core Qt6::Widgets)
   target_compile_options(
     ${CMAKE_PROJECT_NAME}
-    PRIVATE
-      $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-quoted-include-in-framework-header
-      -Wno-comma>)
+    PRIVATE $<$<C_COMPILER_ID:Clang,AppleClang>:-Wno-quoted-include-in-framework-header -Wno-comma>
+  )
   set_target_properties(
     ${CMAKE_PROJECT_NAME}
-    PROPERTIES AUTOMOC ON
-               AUTOUIC ON
-               AUTORCC ON)
+    PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON
+  )
 endif()
 
 # ===== plugin-support.c を生成（.in を直接ビルドに入れない）=====
 set(GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 file(MAKE_DIRECTORY "${GEN_DIR}")
 
-set(PLUGIN_SUPPORT_IN
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/infra_shared/support/plugin-support.c.in")
+set(PLUGIN_SUPPORT_IN "${CMAKE_CURRENT_SOURCE_DIR}/src/infra_shared/support/plugin-support.c.in")
 set(PLUGIN_SUPPORT_OUT "${GEN_DIR}/plugin-support.c")
 
 configure_file("${PLUGIN_SUPPORT_IN}" "${PLUGIN_SUPPORT_OUT}" @ONLY)
@@ -51,15 +47,19 @@ set_source_files_properties("${PLUGIN_SUPPORT_OUT}" PROPERTIES GENERATED TRUE)
 
 target_sources(
   ${CMAKE_PROJECT_NAME}
-  PRIVATE ${PLUGIN_SUPPORT_OUT}
-          src/app/plugin-main.cpp
-          src/features/startup_check/app/StartupCheckFacade.cpp
-          src/features/startup_check/domain/StartupCheckService.cpp
-          src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
-          src/infra_shared/log/ObsLogger.c)
+  PRIVATE
+    ${PLUGIN_SUPPORT_OUT}
+    src/app/plugin-main.cpp
+    src/features/startup_check/app/StartupCheckFacade.cpp
+    src/features/startup_check/domain/StartupCheckService.cpp
+    src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
+    src/infra_shared/log/ObsLogger.c
+)
 
 target_include_directories(
-  ${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
-                                ${CMAKE_CURRENT_BINARY_DIR}/generated)
+  ${CMAKE_PROJECT_NAME}
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/generated
+)
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME
-                             ${_name})
+                             ${_name}
+)
