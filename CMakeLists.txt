@@ -58,6 +58,11 @@ target_sources(
     src/features/startup_check/infrastructure/StdFsDirectoryCreator.cpp
     src/infra_shared/config/path/ObsConfigPathProvider.cpp
     src/infra_shared/log/ObsLogger.c
+    src/infra_shared/fs/FsUtils.cpp
+    src/infra_shared/fs/roots/ObsConfigRootProvider.cpp
+    src/infra_shared/fs/PathResolver.cpp
+    src/infra_shared/fs/FileStore.cpp
+    src/infra_shared/startup/EnsurePluginDir.cpp
     src/public_api/log/FoxclipLogApi.c
 )
 

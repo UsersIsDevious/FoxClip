@@ -7,9 +7,7 @@ namespace foxclip::startup_check::app {
 
 class StartupCheckFacade {
 public:
-	StartupCheckFacade(std::unique_ptr<foxclip::startup_check::domain::IDirectoryChecker> checker,
-			   std::string basePath, std::string requiredName);
-	// basePath 省略版 (デフォルトで "")
+	// 起動時に作る/確認するサブディレクトリ名だけ受け取る（例: "foxclip-plugins"）
 	StartupCheckFacade(std::unique_ptr<domain::IDirectoryChecker> checker, std::string requiredName);
 	foxclip::startup_check::domain::Result run(); // ログ出力やエラー整形もここで
 private:

@@ -1,34 +1,31 @@
 #include "StartupCheckFacade.h"
 #include "infra_shared/log/ObsLogger.h"
-#include "infra_shared/config/path/ObsConfigPathProvider.h"
+#include "infra_shared/startup/EnsurePluginDir.h"
 #include <memory>
 
 namespace foxclip::startup_check::app {
 
-StartupCheckFacade::StartupCheckFacade(std::unique_ptr<foxclip::startup_check::domain::IDirectoryChecker> checker,
-				       std::string basePath, std::string requiredName)
+StartupCheckFacade::StartupCheckFacade(std::unique_ptr<domain::IDirectoryChecker> checker, std::string requiredName)
 	: checker_(std::move(checker)),
 	  creator_()
 {
-	// OBS の書き込み可能ディレクトリに解決
-	using foxclip::infra_shared::config::path::MakeObsConfigPathProvider;
-	auto provider = MakeObsConfigPathProvider();
-	const std::string full = provider->config_path(requiredName);
-	if (!full.empty()) {
-		service_ = std::make_unique<foxclip::startup_check::domain::StartupCheckService>(
-			*checker_, foxclip::startup_check::domain::DirectoryPolicy{full}, "", creator_);
-		OBS_LOG_INFO("[foxclip] using OBS config dir: %s", full.c_str());
-	} else {
-		service_ = std::make_unique<foxclip::startup_check::domain::StartupCheckService>(
-			*checker_, foxclip::startup_check::domain::DirectoryPolicy{requiredName}, basePath, creator_);
-		OBS_LOG_WARN("[foxclip] failed to get OBS config dir; fallback to basePath='%s', name='%s'",
-			     basePath.c_str(), requiredName.c_str());
-	}
-}
+	// 起動用ユーティリティ（OBSの書き込み可能パスを解決 → 必要なら作成）
+	using foxclip::infra_shared::startup::ensure_obs_writable_dir;
+	const auto er = ensure_obs_writable_dir(requiredName);
 
-StartupCheckFacade::StartupCheckFacade(std::unique_ptr<domain::IDirectoryChecker> checker, std::string requiredName)
-	: StartupCheckFacade(std::move(checker), "", std::move(requiredName))
-{
+	if (er.ok && !er.full_path.empty()) {
+		// StartupCheckService へは「requiredName=フルパス」「basePath=""」で渡す
+		service_ = std::make_unique<domain::StartupCheckService>(
+			*checker_, domain::DirectoryPolicy{er.full_path}, "", creator_);
+		OBS_LOG_INFO("[foxclip] using OBS config dir: %s", er.full_path.c_str());
+	} else {
+		// フォールバック（相対パスで '.' / 実際の作成は service_.run() に委ねる）
+		service_ = std::make_unique<domain::StartupCheckService>(
+			*checker_, domain::DirectoryPolicy{requiredName}, ".", creator_);
+		OBS_LOG_WARN("[foxclip] %s; fallback to ./'%s'",
+			     er.error_message.empty() ? "failed to ensure obs dir" : er.error_message.c_str(),
+			     requiredName.c_str());
+	}
 }
 
 foxclip::startup_check::domain::Result StartupCheckFacade::run()
