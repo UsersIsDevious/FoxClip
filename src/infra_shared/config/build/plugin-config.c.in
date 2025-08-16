@@ -1,0 +1,4 @@
+#include "infra_shared/config/build/plugin-config.h"
+
+const char *PLUGIN_NAME = "@CMAKE_PROJECT_NAME@";
+const char *PLUGIN_VERSION = "@CMAKE_PROJECT_VERSION@";

@@ -34,6 +34,32 @@ if(ENABLE_QT)
   )
 endif()
 
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.cpp)
+# ===== plugin-config.c を生成（.in を直接ビルドに入れない）=====
+set(GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+file(MAKE_DIRECTORY "${GEN_DIR}")
 
-set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
+set(PLUGIN_CONFIG_IN "${CMAKE_CURRENT_SOURCE_DIR}/src/infra_shared/config/build/plugin-config.c.in")
+set(PLUGIN_CONFIG_OUT "${GEN_DIR}/plugin-config.c")
+
+configure_file("${PLUGIN_CONFIG_IN}" "${PLUGIN_CONFIG_OUT}" @ONLY)
+set_source_files_properties("${PLUGIN_CONFIG_OUT}" PROPERTIES GENERATED TRUE)
+# ===============================================================
+
+target_sources(
+  ${CMAKE_PROJECT_NAME}
+  PRIVATE
+    ${PLUGIN_CONFIG_OUT}
+    src/app/plugin-main.cpp
+    src/features/startup_check/app/StartupCheckFacade.cpp
+    src/features/startup_check/domain/StartupCheckService.cpp
+    src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
+    src/infra_shared/log/ObsLogger.c
+)
+
+target_include_directories(
+  ${CMAKE_PROJECT_NAME}
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/generated
+)
+set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME
+                             ${_name}
+)
