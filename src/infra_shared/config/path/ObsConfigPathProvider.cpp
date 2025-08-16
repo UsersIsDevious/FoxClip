@@ -1,25 +1,28 @@
 #include "ObsConfigPathProvider.h"
-#include <obs-module.h>   // obs_module_config_path
+#include <obs-module.h>    // obs_module_config_path
 #include <util/platform.h> // bfree
-#include <memory> 
+#include <memory>
 
 namespace foxclip::infra_shared::config::path {
 
 class ObsConfigPathProvider final : public IConfigPathProvider {
 public:
-  std::string config_path(const std::string& subdir) override {
-    const char* arg = subdir.empty() ? nullptr : subdir.c_str();
-    char* raw = obs_module_config_path(arg);
-    if (!raw) return {};
-    std::string path(raw);
-    bfree(raw);
-    return path;
-  }
+	std::string config_path(const std::string &subdir) override
+	{
+		const char *arg = subdir.empty() ? nullptr : subdir.c_str();
+		char *raw = obs_module_config_path(arg);
+		if (!raw)
+			return {};
+		std::string path(raw);
+		bfree(raw);
+		return path;
+	}
 };
 
 // 生成ヘルパ（必要なら）
-std::unique_ptr<IConfigPathProvider> MakeObsConfigPathProvider() {
-  return std::make_unique<ObsConfigPathProvider>();
+std::unique_ptr<IConfigPathProvider> MakeObsConfigPathProvider()
+{
+	return std::make_unique<ObsConfigPathProvider>();
 }
 
-} // namespace foxclip::infra_shared::config
+} // namespace foxclip::infra_shared::config::path
