@@ -75,7 +75,4 @@ install(
     DESTINATION
       "obs-plugins/${_name}" # macOS/Linux
 )
-
-# ローカライズファイルの配置
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data/obs-plugins/${_name}/locale DESTINATION "data/obs-plugins/${_name}")
 # ===============================================
