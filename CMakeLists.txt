@@ -63,3 +63,16 @@ target_include_directories(
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME
                              ${_name}
 )
+
+# ===== ローカライズファイルのインストール =====
+# 期待する配置: <repo>/data/obs-plugins/${_name}/locale/en-US.ini, ja-JP.ini, ...
+install(
+  TARGETS ${CMAKE_PROJECT_NAME}
+  RUNTIME
+    DESTINATION
+      "obs-plugins/${_name}" # Windows
+  LIBRARY
+    DESTINATION
+      "obs-plugins/${_name}" # macOS/Linux
+)
+# ===============================================

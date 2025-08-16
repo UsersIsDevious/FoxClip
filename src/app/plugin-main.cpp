@@ -31,7 +31,8 @@ bool obs_module_load(void)
 	}
 
 	// Tools メニューにカスタム QAction を追加
-	void *raw = obs_frontend_add_tools_menu_qaction("FoxClip Mmenu");
+	const char *label = obs_module_text("Tools.Menu.FoxClip");
+	void *raw = obs_frontend_add_tools_menu_qaction(label);
 
 	// まず QObject* に静的キャストし、その後 qobject_cast で安全に QAction* へ
 	QObject *obj = static_cast<QObject *>(raw);
