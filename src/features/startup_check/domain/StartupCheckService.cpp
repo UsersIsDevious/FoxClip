@@ -12,7 +12,7 @@ StartupCheckService::StartupCheckService(const IDirectoryChecker &checker, Direc
 
 Result StartupCheckService::run() const
 {
-    std::string target = (std::filesystem::path(basePath_) / policy_.requiredName).string();
+	std::string target = (std::filesystem::path(basePath_) / policy_.requiredName).string();
 	if (!checker_.existsDir(target)) {
 		return Result::failure("必須ディレクトリ '" + policy_.requiredName + "' が存在しません");
 	}

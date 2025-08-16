@@ -6,7 +6,8 @@ namespace foxclip::features::startup_check::app {
 
 class StartupCheckFacade {
 public:
-	StartupCheckFacade(std::unique_ptr<foxclip::domain::IDirectoryChecker> checker, std::string basePath, std::string requiredName);
+	StartupCheckFacade(std::unique_ptr<foxclip::domain::IDirectoryChecker> checker, std::string basePath,
+			   std::string requiredName);
 	foxclip::domain::Result run(); // ログ出力やエラー整形もここで
 private:
 	std::unique_ptr<foxclip::domain::IDirectoryChecker> checker_;
