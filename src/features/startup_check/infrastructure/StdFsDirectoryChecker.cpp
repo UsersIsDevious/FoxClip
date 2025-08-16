@@ -18,4 +18,4 @@ bool StdFsDirectoryChecker::existsDir(const std::string &path) const
 	return fs::is_directory(st);
 }
 
-} // namespace foxclip::features::startup_check::infrastructure
+} // namespace foxclip::startup_check::infrastructure

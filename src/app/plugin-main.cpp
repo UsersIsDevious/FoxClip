@@ -20,7 +20,7 @@ bool obs_module_load(void)
 	using foxclip::startup_check::infrastructure::StdFsDirectoryChecker;
 
 	auto checker = std::make_unique<StdFsDirectoryChecker>();
-	StartupCheckFacade facade(std::move(checker),"foxclip-plugins");
+	StartupCheckFacade facade(std::move(checker), "foxclip-plugins");
 	auto r = facade.run();
 	if (!r.ok) {
 		// Log error Directory does not exist
