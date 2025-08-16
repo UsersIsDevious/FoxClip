@@ -3,9 +3,9 @@
 
 namespace foxclip::features::startup_check::app {
 
-StartupCheckFacade::StartupCheckFacade(std::string basePath, std::string requiredName)
-	: checker_(),
-	  service_(checker_, {std::move(requiredName)}, std::move(basePath))
+StartupCheckFacade::StartupCheckFacade(std::unique_ptr<foxclip::domain::IDirectoryChecker> checker, std::string basePath, std::string requiredName)
+	: checker_(std::move(checker)),
+	  service_(*checker_, {std::move(requiredName)}, std::move(basePath))
 {
 }
 

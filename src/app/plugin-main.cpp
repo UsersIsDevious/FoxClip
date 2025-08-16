@@ -4,7 +4,7 @@
 #include <obs-frontend-api.h>
 
 #include "infra_shared/log/ObsLogger.h"
-#include "infra_shared/support/plugin-support.h"
+#include "infra_shared/config/build/plugin-config.h"
 #include "features/startup_check/app/StartupCheckFacade.h"
 
 OBS_DECLARE_MODULE()
@@ -17,11 +17,21 @@ bool obs_module_load(void)
 
 	//checking plugins directory
 	using foxclip::features::startup_check::app::StartupCheckFacade;
-	StartupCheckFacade facade(".", "foxclip-plugins");
+	using foxclip::features::startup_check::infrastructure::StdFsDirectoryChecker;
+
+	auto checker = std::make_unique<StdFsDirectoryChecker>();
+	StartupCheckFacade facade(std::move(checker), ".", "foxclip-plugins");
 	auto r = facade.run();
+	if (!r.ok) {
+		// Log error Directory does not exist
+		OBS_LOG_ERROR("Startup check failed: %s", r.message.c_str());
+		// but for now, we just log the error and continue
+		// TODO: In the future, add functionality to automatically create the directory if it does not exist
+		//return false;
+	}
 
 	// Set Custom QAction in OBS Tools menu
-	QAction *act = (QAction *)obs_frontend_add_tools_menu_qaction("FoxClip Mmenu");
+	QAction *act = static_cast<QAction *>(obs_frontend_add_tools_menu_qaction("FoxClip Mmenu"));
 	if (!act) {
 		OBS_LOG_ERROR("Failed to create Tools menu QAction");
 		return true;
@@ -34,5 +44,5 @@ bool obs_module_load(void)
 
 void obs_module_unload(void)
 {
-	obs_log(LOG_INFO, "plugin unloaded");
+	OBS_LOG_INFO("plugin unloaded");
 }

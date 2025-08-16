@@ -34,21 +34,21 @@ if(ENABLE_QT)
   )
 endif()
 
-# ===== plugin-support.c を生成（.in を直接ビルドに入れない）=====
+# ===== plugin-config.c を生成（.in を直接ビルドに入れない）=====
 set(GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 file(MAKE_DIRECTORY "${GEN_DIR}")
 
-set(PLUGIN_SUPPORT_IN "${CMAKE_CURRENT_SOURCE_DIR}/src/infra_shared/support/plugin-support.c.in")
-set(PLUGIN_SUPPORT_OUT "${GEN_DIR}/plugin-support.c")
+set(PLUGIN_CONFIG_IN "${CMAKE_CURRENT_SOURCE_DIR}/src/infra_shared/config/build/plugin-config.c.in")
+set(PLUGIN_CONFIG_OUT "${GEN_DIR}/plugin-config.c")
 
-configure_file("${PLUGIN_SUPPORT_IN}" "${PLUGIN_SUPPORT_OUT}" @ONLY)
-set_source_files_properties("${PLUGIN_SUPPORT_OUT}" PROPERTIES GENERATED TRUE)
+configure_file("${PLUGIN_CONFIG_IN}" "${PLUGIN_CONFIG_OUT}" @ONLY)
+set_source_files_properties("${PLUGIN_CONFIG_OUT}" PROPERTIES GENERATED TRUE)
 # ===============================================================
 
 target_sources(
   ${CMAKE_PROJECT_NAME}
   PRIVATE
-    ${PLUGIN_SUPPORT_OUT}
+    ${PLUGIN_CONFIG_OUT}
     src/app/plugin-main.cpp
     src/features/startup_check/app/StartupCheckFacade.cpp
     src/features/startup_check/domain/StartupCheckService.cpp
