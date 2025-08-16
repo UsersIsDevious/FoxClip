@@ -13,6 +13,8 @@ include(helpers)
 
 add_library(${CMAKE_PROJECT_NAME} MODULE)
 
+target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE FOXCLIP_BUILDING)
+
 find_package(libobs REQUIRED)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE OBS::libobs)
 
@@ -53,12 +55,20 @@ target_sources(
     src/features/startup_check/app/StartupCheckFacade.cpp
     src/features/startup_check/domain/StartupCheckService.cpp
     src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
+    src/features/startup_check/infrastructure/StdFsDirectoryCreator.cpp
+    src/infra_shared/config/path/ObsConfigPathProvider.cpp
     src/infra_shared/log/ObsLogger.c
+    src/public_api/log/FoxclipLogApi.c
 )
 
 target_include_directories(
   ${CMAKE_PROJECT_NAME}
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/generated
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_BINARY_DIR}/generated
 )
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME
                              ${_name}
