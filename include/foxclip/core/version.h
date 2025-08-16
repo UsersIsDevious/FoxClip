@@ -1,0 +1,5 @@
+#pragma once
+#define MYPLUGIN_SDK_VERSION_MAJOR 1
+#define MYPLUGIN_SDK_VERSION_MINOR 0
+#define MYPLUGIN_SDK_VERSION_PATCH 0
+#define MYPLUGIN_SDK_ABI 1  /* 破壊的変更時に++ */
