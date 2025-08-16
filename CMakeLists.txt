@@ -54,6 +54,7 @@ target_sources(
     src/features/startup_check/domain/StartupCheckService.cpp
     src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
     src/infra_shared/log/ObsLogger.c
+    src/public_api/log/FoxclipLogApi.c
 )
 
 target_include_directories(
