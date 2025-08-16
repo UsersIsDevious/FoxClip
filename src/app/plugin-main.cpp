@@ -30,12 +30,18 @@ bool obs_module_load(void)
 		//return false;
 	}
 
-	// Set Custom QAction in OBS Tools menu
-	QAction *act = static_cast<QAction *>(obs_frontend_add_tools_menu_qaction("FoxClip Mmenu"));
+	// Tools メニューにカスタム QAction を追加
+	void *raw = obs_frontend_add_tools_menu_qaction("FoxClip Mmenu");
+
+	// まず QObject* に静的キャストし、その後 qobject_cast で安全に QAction* へ
+	QObject *obj = static_cast<QObject *>(raw);
+	QAction *act = qobject_cast<QAction *>(obj);
+
 	if (!act) {
 		OBS_LOG_ERROR("Failed to create Tools menu QAction");
 		return true;
 	}
+
 	QObject::connect(act, &QAction::triggered,
 			 []() { OBS_LOG_INFO("QAction triggered (version %s)", PLUGIN_VERSION); });
 
