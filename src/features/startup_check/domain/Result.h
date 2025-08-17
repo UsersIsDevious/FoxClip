@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace foxclip::domain {
+namespace foxclip::startup_check::domain {
 
 struct Result {
 	bool ok;
@@ -10,4 +10,4 @@ struct Result {
 	static Result failure(std::string msg) { return {false, std::move(msg)}; }
 };
 
-} // namespace foxclip::domain
+} // namespace foxclip::startup_check::domain

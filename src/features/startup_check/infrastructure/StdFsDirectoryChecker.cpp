@@ -1,7 +1,7 @@
 #include "StdFsDirectoryChecker.h"
 #include "infra_shared/log/ObsLogger.h" // OBS_LOG_ERROR など
 
-namespace foxclip::features::startup_check::infrastructure {
+namespace foxclip::startup_check::infrastructure {
 
 bool StdFsDirectoryChecker::existsDir(const std::string &path) const
 {
@@ -18,4 +18,4 @@ bool StdFsDirectoryChecker::existsDir(const std::string &path) const
 	return fs::is_directory(st);
 }
 
-} // namespace foxclip::features::startup_check::infrastructure
+} // namespace foxclip::startup_check::infrastructure
