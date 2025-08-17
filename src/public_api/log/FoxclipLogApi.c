@@ -48,62 +48,60 @@ void FC_CALL fc_log_v(fc_log_level_t level, const char *tag, const char *fmt, va
 	if (level < g_min_level)
 		return;
 
-	/* 1) 本文を vsnprintf で整形（サイズ見積 → 確保 → 成形） */
+	/* 1) 本文長を見積もる（args は消費しないよう必ずコピーを使う） */
 	va_list args_copy;
 	va_copy(args_copy, args);
 
 #if defined(_MSC_VER)
-	/* MSVC: _vscprintf は終端NULを含まない必要サイズを返す */
+	/* _vscprintf は終端NULを含まない必要サイズを返す（負ならエラー） */
 	int body_len = _vscprintf(fmt, args_copy);
-	if (body_len < 0) {
-		va_end(args_copy);
-		return;
-	}
-	size_t body_size = (size_t)body_len + 1;
 #else
 	int body_len = vsnprintf(NULL, 0, fmt, args_copy);
-	if (body_len < 0) {
-		va_end(args_copy);
-		return;
-	}
-	size_t body_size = (size_t)body_len + 1;
 #endif
-
 	va_end(args_copy);
 
-	char *body = (char *)malloc(body_size);
-	if (!body)
-		return;
+	if (body_len < 0) {
+		return; /* フォーマットエラー */
+	}
 
-	vsnprintf(body, body_size, fmt, args);
-
-	/* 2) 先頭に "[tag] " を付与（tag が NULL/空ならそのまま） */
+	/* 2) プレフィックス("[tag] ")長を見積もる（tag が NULL/空なら0） */
 	const char *tag_prefix = (tag && tag[0]) ? tag : NULL;
-	const char *sep = (tag_prefix ? "] " : "");
-	size_t prefix_len = tag_prefix ? (2 /* '[' + ']' */ + strlen(tag_prefix) + strlen(sep)) : 0;
+	int prefix_len = 0;
+	if (tag_prefix) {
+		/* ここで "] " を含む完全な形を一発で作るため、余計な ']' は入れない */
+		int n = snprintf(NULL, 0, "[%s] ", tag_prefix);
+		if (n > 0)
+			prefix_len = n;
+		else
+			prefix_len = 0; /* 念のため */
+	}
 
-	/* 例: "[my-plugin] " + 本文 + NUL */
-	size_t total_size = prefix_len + strlen(body) + 1;
-	char *line = (char *)malloc(total_size);
+	/* 3) 合計サイズを計算して1回の malloc で確保（+1はNUL） */
+	size_t total_len = (size_t)prefix_len + (size_t)body_len;
+	char *line = (char *)malloc(total_len + 1);
 	if (!line) {
-		free(body);
 		return;
 	}
 
+	/* 4) 実際に書き込む：先にプレフィックス、続いて本文 */
+	int written = 0;
 	if (tag_prefix) {
-		/* "[tag] " を作る */
-		int n = snprintf(line, total_size, "[%s]%s%s", tag_prefix, sep, body);
-		(void)n;
-	} else {
-		/* タグ無し */
-		memcpy(line, body, total_size);
+		/* prefix_len は NUL を含まない長さなので、size は +1 でOK */
+		written = snprintf(line, (size_t)prefix_len + 1, "[%s] ", tag_prefix);
+		if (written < 0) {
+			/* 万一失敗したらプレフィックス無しで本文だけ出す */
+			written = 0;
+		}
 	}
 
-	/* 3) 出力（obs_log は可変長…なので整形済み文字列を "%s" で渡す） */
+	/* 本文は vsnprintf で後ろに連結。上では args_copy を消費しただけなので args は未消費 */
+	/* body_len は NUL を含まない長さなので、書き込みバッファは +1 */
+	(void)vsnprintf(line + written, (size_t)body_len + 1, fmt, args);
+
+	/* 5) 出力（整形済みを "%s" で渡す） */
 	obs_log(level_to_obs(level), "%s", line);
 
 	free(line);
-	free(body);
 }
 
 /* printf 互換版 */
