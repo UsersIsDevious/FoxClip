@@ -6,11 +6,10 @@ namespace foxclip::infra_shared::fs::roots {
 using foxclip::infra_shared::config::path::makeObsConfigPathProvider;
 using foxclip::infra_shared::config::path::IConfigPathProvider;
 
-
 ObsConfigRootProvider::ObsConfigRootProvider(std::shared_ptr<IConfigPathProvider> provider)
-    : pathProvider(provider ? std::move(provider) : makeObsConfigPathProvider())
+	: pathProvider(provider ? std::move(provider) : makeObsConfigPathProvider())
 {
-    // 本体
+	// 本体
 }
 
 std::string ObsConfigRootProvider::root()

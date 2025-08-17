@@ -15,13 +15,13 @@ StartupCheckFacade::StartupCheckFacade(std::unique_ptr<domain::IDirectoryChecker
 
 	if (er.ok && !er.fullPath.empty()) {
 		// StartupCheckService へは「requiredName=フルパス」「basePath=""」で渡す
-		service = std::make_unique<domain::StartupCheckService>(*dirChecker.get(), domain::DirectoryPolicy{er.fullPath},
-									"", creator);
+		service = std::make_unique<domain::StartupCheckService>(
+			*dirChecker.get(), domain::DirectoryPolicy{er.fullPath}, "", creator);
 		OBS_LOG_INFO("[foxclip] using OBS config dir: %s", er.fullPath.c_str());
 	} else {
 		// フォールバック（相対パスで '.' / 実際の作成は service.run() に委ねる）
-		service = std::make_unique<domain::StartupCheckService>(*dirChecker.get(), domain::DirectoryPolicy{requiredName},
-									".", creator);
+		service = std::make_unique<domain::StartupCheckService>(
+			*dirChecker.get(), domain::DirectoryPolicy{requiredName}, ".", creator);
 
 		const std::string errorMsg = er.errorMessage.empty() ? "failed to ensure obs dir" : er.errorMessage;
 
