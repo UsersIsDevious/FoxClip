@@ -68,7 +68,7 @@ bool FileStore::exists(const std::string &rel, std::error_code &ec) const
 		ec = std::make_error_code(std::errc::invalid_argument);
 		return false;
 	}
-	return exists_dir(full, ec) || std::filesystem::exists(full, ec);
+	return std::filesystem::exists(full, ec);
 }
 
 } // namespace foxclip::infra_shared::fs

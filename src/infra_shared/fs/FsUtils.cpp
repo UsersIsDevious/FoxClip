@@ -31,8 +31,6 @@ std::string join(const std::string &base, const std::string &name)
 
 bool is_abs(const std::string &pathStr) noexcept
 {
-	std::error_code ec;
-	(void)ec;
 	return stdfs::path(pathStr).is_absolute();
 }
 

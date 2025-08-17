@@ -13,17 +13,17 @@ StartupCheckFacade::StartupCheckFacade(std::unique_ptr<domain::IDirectoryChecker
 	using foxclip::infra_shared::startup::ensure_obs_writable_dir;
 	const auto er = ensure_obs_writable_dir(requiredName);
 
-	if (er.ok && !er.full_path.empty()) {
+	if (er.ok && !er.fullPath.empty()) {
 		// StartupCheckService へは「requiredName=フルパス」「basePath=""」で渡す
 		service_ = std::make_unique<domain::StartupCheckService>(
-			*checker_, domain::DirectoryPolicy{er.full_path}, "", creator_);
-		OBS_LOG_INFO("[foxclip] using OBS config dir: %s", er.full_path.c_str());
+			*checker_, domain::DirectoryPolicy{er.fullPath}, "", creator_);
+		OBS_LOG_INFO("[foxclip] using OBS config dir: %s", er.fullPath.c_str());
 	} else {
 		// フォールバック（相対パスで '.' / 実際の作成は service_.run() に委ねる）
 		service_ = std::make_unique<domain::StartupCheckService>(
 			*checker_, domain::DirectoryPolicy{requiredName}, ".", creator_);
 		OBS_LOG_WARN("[foxclip] %s; fallback to ./'%s'",
-			     er.error_message.empty() ? "failed to ensure obs dir" : er.error_message.c_str(),
+			     er.errorMessage.empty() ? "failed to ensure obs dir" : er.errorMessage.c_str(),
 			     requiredName.c_str());
 	}
 }

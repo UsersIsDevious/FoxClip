@@ -17,25 +17,18 @@ static bool contains_parent_ref(const std::string &rel)
 
 std::string PathResolver::to_full(const std::string &relative, bool *ok) const
 {
-	bool good = true;
-	if (relative.empty())
-		good = false;
-	if (is_abs(relative))
-		good = false;
-	if (contains_parent_ref(relative))
-		good = false;
-
-	std::string base = root_.root();
-	if (base.empty())
-		good = false;
-
-	if (!good) {
-		if (ok)
-			*ok = false;
+	if (relative.empty() || is_abs(relative) || contains_parent_ref(relative)) {
+		if (ok) *ok = false;
 		return {};
 	}
-	if (ok)
-		*ok = true;
+
+	std::string base = root_.root();
+	if (base.empty()) {
+		if (ok) *ok = false;
+		return {};
+	}
+
+	if (ok) *ok = true;
 	return (stdfs::path(base) / stdfs::path(relative)).lexically_normal().string();
 }
 

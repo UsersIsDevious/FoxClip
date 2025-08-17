@@ -12,8 +12,6 @@ struct IDirectoryChecker {
 
 class StartupCheckService {
 public:
-	//StartupCheckService(const IDirectoryChecker &checker, DirectoryPolicy policy, std::string basePath);
-	//Result run() const;
 	StartupCheckService(const IDirectoryChecker &checker, DirectoryPolicy policy, std::string basePath,
 			    DirectoryCreator &creator);
 	Result run();
