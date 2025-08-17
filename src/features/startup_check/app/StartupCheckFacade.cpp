@@ -22,9 +22,10 @@ StartupCheckFacade::StartupCheckFacade(std::unique_ptr<domain::IDirectoryChecker
 		// フォールバック（相対パスで '.' / 実際の作成は service_.run() に委ねる）
 		service_ = std::make_unique<domain::StartupCheckService>(
 			*checker_, domain::DirectoryPolicy{requiredName}, ".", creator_);
-		OBS_LOG_WARN("[foxclip] %s; fallback to ./'%s'",
-			     er.errorMessage.empty() ? "failed to ensure obs dir" : er.errorMessage.c_str(),
-			     requiredName.c_str());
+
+		const std::string error_msg = er.errorMessage.empty() ? "failed to ensure obs dir" : er.errorMessage;
+
+		OBS_LOG_WARN("[foxclip] %s; fallback to ./'%s'", error_msg.c_str(), requiredName.c_str());
 	}
 }
 

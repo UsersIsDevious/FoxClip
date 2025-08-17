@@ -12,7 +12,13 @@ bool StdFsDirectoryCreator::create_if_missing(const std::string &path, std::erro
 	if (fs::exists(path, ec)) {
 		if (ec)
 			return false;
-		return true;
+		if (fs::is_directory(path, ec))
+			return true;
+
+		// 存在はするがディレクトリではない
+		if (!ec)
+			ec = std::make_error_code(std::errc::file_exists);
+		return false;
 	}
 	// 足りない親までまとめて作成
 	const bool ok = fs::create_directories(path, ec);

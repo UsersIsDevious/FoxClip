@@ -20,7 +20,7 @@ public:
 };
 
 // 生成ヘルパ（必要なら）
-std::unique_ptr<IConfigPathProvider> MakeObsConfigPathProvider()
+std::unique_ptr<IConfigPathProvider> makeObsConfigPathProvider()
 {
 	return std::make_unique<ObsConfigPathProvider>();
 }

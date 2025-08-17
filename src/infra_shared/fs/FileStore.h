@@ -16,6 +16,7 @@ public:
 	bool exists(const std::string &rel, std::error_code &ec) const;
 
 private:
+	bool resolve_path(const std::string& rel, std::string& full, std::error_code& ec) const;
 	PathResolver &resolver_;
 };
 

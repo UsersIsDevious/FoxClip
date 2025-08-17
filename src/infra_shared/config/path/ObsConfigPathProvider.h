@@ -14,6 +14,6 @@ public:
 	virtual std::string config_path(const std::string &subdir) = 0;
 };
 
-std::unique_ptr<IConfigPathProvider> MakeObsConfigPathProvider();
+std::unique_ptr<IConfigPathProvider> makeObsConfigPathProvider();
 
 } // namespace foxclip::infra_shared::config::path
