@@ -60,7 +60,7 @@ bool FileStore::write_text(const std::string &rel, const std::string &utf8, std:
 		return false;
 	}
 	// 明示的にフラッシュ
-	// (std::ofstream は自動でフラッシュしないので、書き込み後に明示的に呼ぶ)
+	// デストラクタが呼ばれる前に書き込みをディスクに反映させるため、明示的にフラッシュ
 	ofs.flush();
 	if (!ofs.good()) {
 		ec = std::make_error_code(std::errc::io_error);
