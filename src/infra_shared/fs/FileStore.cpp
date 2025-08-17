@@ -8,13 +8,14 @@ namespace foxclip::infra_shared::fs {
 
 bool FileStore::resolve_path(const std::string &rel, std::string &full, std::error_code &ec) const
 {
-	bool ok = false;
-	full = resolver_.to_full(rel, &ok);
-	if (!ok) {
-		ec = std::make_error_code(std::errc::invalid_argument);
-		return false;
+	ec.clear();
+	// 相対パスを OBS ルートと結合してフルパスを取得
+	if (auto fullOpt = resolver_.to_full(rel)) {
+		full = *fullOpt;
+		return true;
 	}
-	return true;
+	ec = std::make_error_code(std::errc::invalid_argument);
+	return false;
 }
 
 bool FileStore::ensure_dir(const std::string &relDir, std::error_code &ec)
@@ -112,6 +113,7 @@ bool FileStore::exists(const std::string &rel, std::error_code &ec) const
 	std::string full;
 	if (!resolve_path(rel, full, ec))
 		return false;
+
 	return stdfs::exists(full, ec);
 }
 

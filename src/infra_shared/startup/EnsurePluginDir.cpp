@@ -19,10 +19,11 @@ EnsureResult ensure_obs_writable_dir(const std::string &subdir)
 
 	// 2) 相対 subdir をルート配下のフルパスへ正規化
 	PathResolver resolver(root);
-	bool ok = false;
-	const std::string full = resolver.to_full(subdir, &ok);
-	if (!ok || full.empty())
+	const auto fullOpt = resolver.to_full(subdir);
+	if (!fullOpt || fullOpt->empty())
 		return {false, {}, "invalid subdir (absolute or contains ..)"};
+
+	const std::string &full = *fullOpt;
 
 	std::error_code ec;
 	if (!create_dirs(full, ec)) {
