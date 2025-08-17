@@ -17,10 +17,10 @@ public:
 	Result run();
 
 private:
-	const IDirectoryChecker &checker_;
-	DirectoryPolicy policy_;
-	std::string basePath_;
-	DirectoryCreator &creator_;
+	const IDirectoryChecker &checker;
+	DirectoryPolicy policy;
+	std::string basePath;
+	DirectoryCreator &creator;
 };
 
 } // namespace foxclip::startup_check::domain

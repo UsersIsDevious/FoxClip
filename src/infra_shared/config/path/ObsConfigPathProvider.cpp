@@ -7,7 +7,7 @@ namespace foxclip::infra_shared::config::path {
 
 class ObsConfigPathProvider final : public IConfigPathProvider {
 public:
-	std::string config_path(const std::string &subdir) override
+	std::string configPath(const std::string &subdir) override
 	{
 		const char *arg = subdir.empty() ? nullptr : subdir.c_str();
 		char *raw = obs_module_config_path(arg);

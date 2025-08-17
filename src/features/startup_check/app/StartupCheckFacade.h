@@ -11,9 +11,9 @@ public:
 	StartupCheckFacade(std::unique_ptr<domain::IDirectoryChecker> checker, std::string requiredName);
 	foxclip::startup_check::domain::Result run(); // ログ出力やエラー整形もここで
 private:
-	std::unique_ptr<foxclip::startup_check::domain::IDirectoryChecker> checker_;
-	foxclip::startup_check::infrastructure::StdFsDirectoryCreator creator_;
-	std::unique_ptr<foxclip::startup_check::domain::StartupCheckService> service_;
+	std::unique_ptr<foxclip::startup_check::domain::IDirectoryChecker> dirChecker;
+	foxclip::startup_check::infrastructure::StdFsDirectoryCreator creator;
+	std::unique_ptr<foxclip::startup_check::domain::StartupCheckService> service;
 };
 
 } // namespace foxclip::startup_check::app

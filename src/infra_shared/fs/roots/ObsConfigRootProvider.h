@@ -18,7 +18,7 @@ public:
 	std::string root() override;
 
 private:
-	std::shared_ptr<Provider> provider_;
+	std::shared_ptr<Provider> pathProvider;
 };
 
 } // namespace foxclip::infra_shared::fs::roots

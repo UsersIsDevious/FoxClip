@@ -10,6 +10,6 @@ struct EnsureResult {
 	std::string errorMessage;
 };
 
-EnsureResult ensure_obs_writable_dir(const std::string &subdir);
+EnsureResult ensureObsWritableDir(const std::string &subdir);
 
 } // namespace foxclip::infra_shared::startup

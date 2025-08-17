@@ -6,7 +6,7 @@
 namespace stdfs = std::filesystem;
 namespace foxclip::infra_shared::fs {
 
-static bool contains_parent_ref(const std::string &rel)
+static bool containsParentRef(const std::string &rel)
 {
 	auto p = stdfs::path(rel);
 	for (const auto &part : p) {
@@ -16,15 +16,15 @@ static bool contains_parent_ref(const std::string &rel)
 	return false;
 }
 
-std::optional<std::string> PathResolver::to_full(const std::string &relative) const
+std::optional<std::string> PathResolver::toFull(const std::string &relative) const
 {
 	// 入力検証：空、絶対、親ディレクトリ参照は拒否
-	if (relative.empty() || is_abs(relative) || contains_parent_ref(relative)) {
+	if (relative.empty() || isAbs(relative) || containsParentRef(relative)) {
 		return std::nullopt;
 	}
 
 	// ルート取得
-	const std::string base = root_.root();
+	const std::string base = root.root();
 	if (base.empty()) {
 		return std::nullopt;
 	}

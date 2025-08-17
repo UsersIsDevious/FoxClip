@@ -5,11 +5,11 @@
 
 namespace foxclip::infra_shared::startup {
 
-EnsureResult ensure_obs_writable_dir(const std::string &subdir)
+EnsureResult ensureObsWritableDir(const std::string &subdir)
 {
 	using foxclip::infra_shared::fs::roots::ObsConfigRootProvider;
 	using foxclip::infra_shared::fs::PathResolver;
-	using foxclip::infra_shared::fs::create_dirs;
+	using foxclip::infra_shared::fs::createDirs;
 
 	// 1) OBS ルート取得（…/plugin_config/<plugin>）
 	ObsConfigRootProvider root;
@@ -19,14 +19,14 @@ EnsureResult ensure_obs_writable_dir(const std::string &subdir)
 
 	// 2) 相対 subdir をルート配下のフルパスへ正規化
 	PathResolver resolver(root);
-	const auto fullOpt = resolver.to_full(subdir);
+	const auto fullOpt = resolver.toFull(subdir);
 	if (!fullOpt || fullOpt->empty())
 		return {false, {}, "invalid subdir (absolute or contains ..)"};
 
 	const std::string &full = *fullOpt;
 
 	std::error_code ec;
-	if (!create_dirs(full, ec)) {
+	if (!createDirs(full, ec)) {
 		std::string msg = "failed to create '" + subdir + "'";
 		if (ec)
 			msg += ": " + ec.message();

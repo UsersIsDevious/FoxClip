@@ -11,7 +11,7 @@ public:
 
 	// arg が空ならモジュールのルート、非空ならそのサブディレクトリのフルパス
 	// 取得に失敗したら空文字を返す（例外は投げない）
-	virtual std::string config_path(const std::string &subdir) = 0;
+	virtual std::string configPath(const std::string &subdir) = 0;
 };
 
 std::unique_ptr<IConfigPathProvider> makeObsConfigPathProvider();

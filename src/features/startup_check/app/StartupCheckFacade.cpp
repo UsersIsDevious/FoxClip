@@ -6,32 +6,32 @@
 namespace foxclip::startup_check::app {
 
 StartupCheckFacade::StartupCheckFacade(std::unique_ptr<domain::IDirectoryChecker> checker, std::string requiredName)
-	: checker_(std::move(checker)),
-	  creator_()
+	: dirChecker(std::move(checker)),
+	  creator()
 {
 	// 起動用ユーティリティ（OBSの書き込み可能パスを解決 → 必要なら作成）
-	using foxclip::infra_shared::startup::ensure_obs_writable_dir;
-	const auto er = ensure_obs_writable_dir(requiredName);
+	using foxclip::infra_shared::startup::ensureObsWritableDir;
+	const auto er = ensureObsWritableDir(requiredName);
 
 	if (er.ok && !er.fullPath.empty()) {
 		// StartupCheckService へは「requiredName=フルパス」「basePath=""」で渡す
-		service_ = std::make_unique<domain::StartupCheckService>(
-			*checker_, domain::DirectoryPolicy{er.fullPath}, "", creator_);
+		service = std::make_unique<domain::StartupCheckService>(*dirChecker.get(), domain::DirectoryPolicy{er.fullPath},
+									"", creator);
 		OBS_LOG_INFO("[foxclip] using OBS config dir: %s", er.fullPath.c_str());
 	} else {
-		// フォールバック（相対パスで '.' / 実際の作成は service_.run() に委ねる）
-		service_ = std::make_unique<domain::StartupCheckService>(
-			*checker_, domain::DirectoryPolicy{requiredName}, ".", creator_);
+		// フォールバック（相対パスで '.' / 実際の作成は service.run() に委ねる）
+		service = std::make_unique<domain::StartupCheckService>(*dirChecker.get(), domain::DirectoryPolicy{requiredName},
+									".", creator);
 
-		const std::string error_msg = er.errorMessage.empty() ? "failed to ensure obs dir" : er.errorMessage;
+		const std::string errorMsg = er.errorMessage.empty() ? "failed to ensure obs dir" : er.errorMessage;
 
-		OBS_LOG_WARN("[foxclip] %s; fallback to ./'%s'", error_msg.c_str(), requiredName.c_str());
+		OBS_LOG_WARN("[foxclip] %s; fallback to ./'%s'", errorMsg.c_str(), requiredName.c_str());
 	}
 }
 
 foxclip::startup_check::domain::Result StartupCheckFacade::run()
 {
-	auto res = service_->run();
+	auto res = service->run();
 	if (res.ok)
 		OBS_LOG_INFO("%s", res.message.c_str());
 	else

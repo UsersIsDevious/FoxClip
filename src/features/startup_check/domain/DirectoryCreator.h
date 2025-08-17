@@ -11,7 +11,7 @@ public:
 
 	/// 成功: true / 既に存在でも true
 	/// 失敗: false（error_code に詳細）
-	virtual bool create_if_missing(const std::string &path, std::error_code &ec) = 0;
+	virtual bool createIfMissing(const std::string &path, std::error_code &ec) = 0;
 };
 
 } // namespace foxclip::startup_check::domain

@@ -5,7 +5,7 @@ namespace fs = std::filesystem;
 
 namespace foxclip::startup_check::infrastructure {
 
-bool StdFsDirectoryCreator::create_if_missing(const std::string &path, std::error_code &ec)
+bool StdFsDirectoryCreator::createIfMissing(const std::string &path, std::error_code &ec)
 {
 	ec.clear();
 	// 既にある場合は true を返す（何もしない）

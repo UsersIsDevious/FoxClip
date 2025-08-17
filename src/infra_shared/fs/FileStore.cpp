@@ -6,11 +6,11 @@
 namespace stdfs = std::filesystem;
 namespace foxclip::infra_shared::fs {
 
-bool FileStore::resolve_path(const std::string &rel, std::string &full, std::error_code &ec) const
+bool FileStore::resolvePath(const std::string &rel, std::string &full, std::error_code &ec) const
 {
 	ec.clear();
 	// 相対パスを OBS ルートと結合してフルパスを取得
-	if (auto fullOpt = resolver_.to_full(rel)) {
+	if (auto fullOpt = resolver.toFull(rel)) {
 		full = *fullOpt;
 		return true;
 	}
@@ -18,31 +18,31 @@ bool FileStore::resolve_path(const std::string &rel, std::string &full, std::err
 	return false;
 }
 
-bool FileStore::ensure_dir(const std::string &relDir, std::error_code &ec)
+bool FileStore::ensureDir(const std::string &relDir, std::error_code &ec)
 {
 	ec.clear();
 
 	// パス解決
 	std::string full;
-	if (!resolve_path(relDir, full, ec))
+	if (!resolvePath(relDir, full, ec))
 		return false;
 
 	// 既に存在するか確認
-	return create_dirs(full, ec);
+	return createDirs(full, ec);
 }
 
-bool FileStore::write_text(const std::string &rel, const std::string &utf8, std::error_code &ec)
+bool FileStore::writeText(const std::string &rel, const std::string &utf8, std::error_code &ec)
 {
 	ec.clear();
 
 	// パス解決
 	std::string full;
-	if (!resolve_path(rel, full, ec))
+	if (!resolvePath(rel, full, ec))
 		return false;
 
 	// 既に存在する場合は何もしない
 	stdfs::path p(full);
-	if (!create_dirs(p.parent_path().string(), ec))
+	if (!createDirs(p.parent_path().string(), ec))
 		return false;
 
 	// ファイルを開く（存在しない場合は新規作成）
@@ -70,13 +70,13 @@ bool FileStore::write_text(const std::string &rel, const std::string &utf8, std:
 	return true;
 }
 
-bool FileStore::read_text(const std::string &rel, std::string &out, std::error_code &ec) const
+bool FileStore::readText(const std::string &rel, std::string &out, std::error_code &ec) const
 {
 	ec.clear();
 
 	// パス解決
 	std::string full;
-	if (!resolve_path(rel, full, ec))
+	if (!resolvePath(rel, full, ec))
 		return false;
 
 	// ファイルを開く
@@ -111,7 +111,7 @@ bool FileStore::exists(const std::string &rel, std::error_code &ec) const
 	ec.clear();
 
 	std::string full;
-	if (!resolve_path(rel, full, ec))
+	if (!resolvePath(rel, full, ec))
 		return false;
 
 	return stdfs::exists(full, ec);
