@@ -57,6 +57,7 @@ target_sources(
     src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
     src/infra_shared/log/ObsLogger.c
     src/public_api/log/FoxclipLogApi.c
+    src/infra_shared/plugin/FoxclipPluginHost.cpp
 )
 
 target_include_directories(
@@ -80,3 +81,51 @@ install(
       "obs-plugins/${_name}" # macOS/Linux
 )
 # ===============================================
+
+# ==== Headers-only SDK（ビルドと同時に出力）====
+set(FOXCLIP_SDK_NAME "foxclip-plugin-sdk")
+set(FOXCLIP_SDK_DIR "${CMAKE_BINARY_DIR}/${FOXCLIP_SDK_NAME}")
+set(FOXCLIP_SDK_INCLUDE_DIR "${FOXCLIP_SDK_DIR}/include")
+set(FOXCLIP_SDK_CMAKE_DIR "${FOXCLIP_SDK_DIR}/cmake/FoxclipPluginHeaders")
+
+# SDK用テンプレを先に生成（configure段階で行う）
+set(_sdk_tmp "${CMAKE_BINARY_DIR}/_sdk_tmp")
+file(MAKE_DIRECTORY "${_sdk_tmp}")
+
+# これら2つの .in ファイルをリポジトリに追加してください（下に中身あり）
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FoxclipPluginHeaders/FoxclipPluginHeadersConfig.cmake.in"
+  "${_sdk_tmp}/FoxclipPluginHeadersConfig.cmake"
+  @ONLY
+)
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FoxclipPluginHeaders/FoxclipPluginHeadersTargets.cmake.in"
+  "${_sdk_tmp}/FoxclipPluginHeadersTargets.cmake"
+  @ONLY
+)
+
+add_custom_target(
+  sdk
+  ALL
+  COMMAND "${CMAKE_COMMAND}" -E rm -rf "${FOXCLIP_SDK_DIR}"
+  COMMAND "${CMAKE_COMMAND}" -E make_directory "${FOXCLIP_SDK_INCLUDE_DIR}"
+  COMMAND "${CMAKE_COMMAND}" -E make_directory "${FOXCLIP_SDK_CMAKE_DIR}"
+  COMMAND "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/include" "${FOXCLIP_SDK_INCLUDE_DIR}"
+  COMMAND
+    "${CMAKE_COMMAND}" -E copy "${_sdk_tmp}/FoxclipPluginHeadersConfig.cmake"
+    "${FOXCLIP_SDK_CMAKE_DIR}/FoxclipPluginHeadersConfig.cmake"
+  COMMAND
+    "${CMAKE_COMMAND}" -E copy "${_sdk_tmp}/FoxclipPluginHeadersTargets.cmake"
+    "${FOXCLIP_SDK_CMAKE_DIR}/FoxclipPluginHeadersTargets.cmake"
+  COMMENT "Staging headers-only SDK to ${FOXCLIP_SDK_DIR}"
+)
+
+# 任意：ZIP も作るなら
+set(FOXCLIP_SDK_ZIP "${CMAKE_BINARY_DIR}/${FOXCLIP_SDK_NAME}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}.zip")
+add_custom_target(
+  sdk_zip
+  COMMAND "${CMAKE_COMMAND}" -E tar "cf" "${FOXCLIP_SDK_ZIP}" --format=zip "${FOXCLIP_SDK_NAME}"
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+  DEPENDS sdk
+  COMMENT "Packaging SDK zip: ${FOXCLIP_SDK_ZIP}"
+)

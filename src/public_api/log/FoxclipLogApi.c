@@ -1,4 +1,4 @@
-#include "foxclip/log/log.h" // ← "include/..." ではなくこちら
+#include "foxclip/log/log.h"
 #include "infra_shared/log/ObsLogger.h"
 #include <stdio.h>
 #include <stdlib.h>
