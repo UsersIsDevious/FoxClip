@@ -3,10 +3,14 @@
 #include <obs-module.h>
 #include <obs-frontend-api.h>
 
+#include "features/startup_check/app/StartupCheckFacade.h"
+#include "infra_shared/fs/DirectoryLister.h"
+#include "infra_shared/fs/roots/ObsConfigRootProvider.h"
+#include "infra_shared/fs/PathResolver.h"
 #include "infra_shared/log/ObsLogger.h"
 #include "infra_shared/config/build/plugin-config.h"
-#include "features/startup_check/app/StartupCheckFacade.h"
 #include "infra_shared/plugin/FoxclipPluginHost.h"
+#include "infra_shared/plugin/PluginFolderLogger.h"
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
@@ -20,8 +24,10 @@ bool obs_module_load(void)
 	using foxclip::startup_check::app::StartupCheckFacade;
 	using foxclip::startup_check::infrastructure::StdFsDirectoryChecker;
 
+	const std::string pluginDirName = "foxclip-plugins";
+
 	auto checker = std::make_unique<StdFsDirectoryChecker>();
-	StartupCheckFacade facade(std::move(checker), "foxclip-plugins");
+	StartupCheckFacade facade(std::move(checker), pluginDirName);
 	auto r = facade.run();
 	if (!r.ok) {
 		// Log error Directory does not exist
@@ -30,6 +36,8 @@ bool obs_module_load(void)
 		// TODO: In the future, add functionality to automatically create the directory if it does not exist
 		//return false;
 	}
+
+	foxclip::infra_shared::plugin::logPluginSubfolders(pluginDirName);
 
 	// Tools メニューにカスタム QAction を追加
 	const char *label = obs_module_text("Tools.Menu.FoxClip");
