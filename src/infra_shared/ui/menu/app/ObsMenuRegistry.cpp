@@ -160,14 +160,21 @@ void ObsMenuRegistry::addMenuAction(const MenuId &topMenuId, const ActionId &act
 		act->setCheckable(checkable);
 
 		// ★ topMenuId もキャプチャして O(1) で該当アクションを引く
+		// コールバックはロック外で実行（デッドロック/ブロッキングを回避）
 		QObject::connect(act, &QAction::triggered, [topMenuId, actionId](bool) {
-			std::lock_guard<std::mutex> lock(mtx());
-			const auto menuIt = menuMap().find(topMenuId);
-			if (menuIt == menuMap().end())
-				return;
-			const auto actionIt = menuIt->second.actions.find(actionId);
-			if (actionIt != menuIt->second.actions.end() && actionIt->second.callback) {
-				actionIt->second.callback(); // UIスレッド内
+			UiVoidFn callback;
+			{
+				std::lock_guard<std::mutex> lock(mtx());
+				const auto menuIt = menuMap().find(topMenuId);
+				if (menuIt == menuMap().end())
+					return;
+				const auto actionIt = menuIt->second.actions.find(actionId);
+				if (actionIt != menuIt->second.actions.end() && actionIt->second.callback) {
+					callback = actionIt->second.callback; // コピーして退避
+				}
+			} // ← ここでロック解放
+			if (callback) {
+				callback(); // UIスレッド内、ロック外で実行
 			}
 		});
 
