@@ -1,0 +1,5 @@
+#pragma once
+#define FOXCLIP_SDK_VERSION_MAJOR 1
+#define FOXCLIP_SDK_VERSION_MINOR 0
+#define FOXCLIP_SDK_VERSION_PATCH 0
+#define FOXCLIP_SDK_ABI 1  /* 破壊的変更時に++ */

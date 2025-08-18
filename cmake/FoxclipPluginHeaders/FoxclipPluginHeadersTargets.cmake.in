@@ -1,0 +1,6 @@
+# Local SDK staged targets (headers-only)
+add_library(Foxclip::PluginHeaders INTERFACE IMPORTED)
+set_target_properties(Foxclip::PluginHeaders PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES "@FOXCLIP_SDK_INCLUDE_DIR@"
+  INTERFACE_COMPILE_DEFINITIONS "FC_USE_VTABLE=1"
+)

@@ -6,6 +6,7 @@
 !/build-aux
 !/cmake
 !/data
+!/include
 !/src
 !/installer
 !/installer/**
@@ -17,6 +18,7 @@
 !CMakePresets.json
 !LICENSE
 !README.md
+!print_code_tree.bat
 
 # Exclude lock files
 *.lock.json
