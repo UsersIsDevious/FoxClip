@@ -26,5 +26,5 @@ typedef void(FOXCLIP_CALL *foxclipPluginDeinitFn)(void);
 
 /* vtable を使うプラグイン側の共有ポインタ（定義はプラグイン側） */
 #if defined(FOXCLIP_USE_VTABLE)
-FOXCLIP_EXTERN const FoxclipApi *gFoxclip;
+FOXCLIP_EXTERN const FoxclipApi *foxclipApi;
 #endif
