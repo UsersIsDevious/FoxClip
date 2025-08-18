@@ -86,7 +86,8 @@ void ObsMenuRegistry::ensureTopLevelMenu(const MenuId &topMenuId, const QString 
 			if (auto *menu = act->menu()) {
 				if (menu->objectName() == QString::fromStdString(topMenuId)) {
 					std::lock_guard<std::mutex> lock(mtx());
-					menuMap()[topMenuId] = MenuRecord{menu, {}};
+					// 既存 actions を保持したまま menu だけ更新
+					menuMap()[topMenuId].menu = menu;
 					if (!visibleTitle.isEmpty())
 						menu->setTitle(visibleTitle);
 					return;
@@ -101,7 +102,9 @@ void ObsMenuRegistry::ensureTopLevelMenu(const MenuId &topMenuId, const QString 
 		bar->addMenu(menu);
 
 		std::lock_guard<std::mutex> lock(mtx());
-		menuMap()[topMenuId] = MenuRecord{menu, {}};
+		// 上書き禁止：レコードが無ければ作成、あれば menu のみ更新
+		auto it = menuMap().try_emplace(topMenuId).first;
+		it->second.menu = menu;
 	});
 }
 
@@ -138,8 +141,10 @@ void ObsMenuRegistry::addMenuAction(const MenuId &topMenuId, const ActionId &act
 				found->setTitle(QString::fromStdString(topMenuId));
 				bar->addMenu(found);
 			}
-			menuMap()[topMenuId] = MenuRecord{found, {}};
-			it = menuMap().find(topMenuId);
+
+			// 既存エントリは保持、無ければ生成
+			it = menuMap().try_emplace(topMenuId).first;
+			it->second.menu = found;
 		}
 
 		auto &rec = it->second;

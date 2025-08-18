@@ -16,6 +16,10 @@
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
 
+// 予約識別子回避＆規約どおり kUpperCamel で定数化
+static const char *const kTestOriginalMenuId = "TestOriginal";
+static const char *const kTestOriginalActionLogId = "TestOriginal.Log";
+
 static void onLogAction()
 {
 	OBS_LOG_INFO("Top menu action clicked (version %s)", PLUGIN_VERSION);
@@ -48,13 +52,13 @@ bool obs_module_load(void)
 	// ▼▼ ここからトップレベルメニューを追加 ▼▼
 	// ID は英数字（objectName用）、表示名は日本語
 	foxclip::ui::menu::ObsMenuRegistry::ensureTopLevelMenu(
-		/*topMenuId=*/"TestOriginal",
+		/*topMenuId=*/kTestOriginalMenuId,
 		/*visibleTitle=*/QObject::tr(u8"テストオリジナルメニュー"));
 
 	// メニュー配下にクリック可能な項目を1つ追加（押されたらログ）
 	foxclip::ui::menu::ObsMenuRegistry::addMenuAction(
-		/*topMenuId=*/"TestOriginal",
-		/*actionId=*/"TestOriginal.Log",
+		/*topMenuId=*/kTestOriginalMenuId,
+		/*actionId=*/kTestOriginalActionLogId,
 		/*title=*/QObject::tr(u8"ログ出力"),
 		/*onTriggered=*/onLogAction);
 
