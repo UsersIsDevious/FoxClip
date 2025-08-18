@@ -1,7 +1,7 @@
 #include "FoxclipPluginHost.h"
 
 #include "foxclip/plugin_api.h" // FoxclipApi / init/deinit の型
-#include "foxclip/log/log.h"    // 実装側なので通常宣言（FOXCLIP_USE_VTABLEは無関係）
+#include "foxclip/log/log.h"    // ログ関数
 
 #include <cstring>
 #include <utility>
@@ -10,18 +10,19 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 using LibHandle = HMODULE;
-static void *ResolveSym(LibHandle h, const char *name)
+
+static void *resolveSym(LibHandle h, const char *name)
 {
 	return reinterpret_cast<void *>(::GetProcAddress(h, name));
 }
-static void CloseLib(LibHandle h)
+static void closeLib(LibHandle h)
 {
 	if (h)
 		::FreeLibrary(h);
 }
 
 // UTF-8 -> UTF-16
-static std::wstring Utf8ToWide(const std::string &s)
+static std::wstring utf8ToWide(const std::string &s)
 {
 	if (s.empty())
 		return std::wstring();
@@ -35,11 +36,11 @@ static std::wstring Utf8ToWide(const std::string &s)
 #else
 #include <dlfcn.h>
 using LibHandle = void *;
-static void *ResolveSym(LibHandle h, const char *name)
+static void *resolveSym(LibHandle h, const char *name)
 {
 	return ::dlsym(h, name);
 }
-static void CloseLib(LibHandle h)
+static void closeLib(LibHandle h)
 {
 	if (h)
 		::dlclose(h);
@@ -54,7 +55,7 @@ constexpr const char *kDeinitSym = "foxclip_plugin_deinit";
 struct State {
 	LibHandle handle = nullptr;
 	foxclipPluginDeinitFn deinit = nullptr;
-} g_state;
+} gState;
 
 /* ホスト側がプラグインへ渡す vtable を構築 */
 static FoxclipApi MakeApi()
@@ -77,7 +78,7 @@ static bool InitWithHandle(LibHandle h)
 	if (!h)
 		return false;
 
-	auto init = reinterpret_cast<foxclipPluginInitFn>(ResolveSym(h, kInitSym));
+	auto init = reinterpret_cast<foxclipPluginInitFn>(resolveSym(h, kInitSym));
 	if (!init)
 		return false;
 
@@ -86,10 +87,10 @@ static bool InitWithHandle(LibHandle h)
 		return false;
 
 	// deinit は任意（存在しない実装も許容）
-	auto deinit = reinterpret_cast<foxclipPluginDeinitFn>(ResolveSym(h, kDeinitSym));
+	auto deinit = reinterpret_cast<foxclipPluginDeinitFn>(resolveSym(h, kDeinitSym));
 
-	g_state.handle = h;
-	g_state.deinit = deinit;
+	gState.handle = h;
+	gState.deinit = deinit;
 	return true;
 }
 
@@ -97,19 +98,19 @@ static bool InitWithHandle(LibHandle h)
 
 namespace foxclip::Host {
 
-bool IsLoaded()
+bool isLoaded()
 {
-	return g_state.handle != nullptr;
+	return gState.handle != nullptr;
 }
 
-bool Load(const std::string &modulePathUtf8)
+bool load(const std::string &modulePathUtf8)
 {
 	// すでにロード済みなら一旦降ろす（多重ロード回避）
-	if (IsLoaded())
-		Unload();
+	if (isLoaded())
+		unload();
 
 #if defined(_WIN32)
-	std::wstring w = Utf8ToWide(modulePathUtf8);
+	std::wstring w = utf8ToWide(modulePathUtf8);
 	if (w.empty())
 		return false;
 	HMODULE h = ::LoadLibraryW(w.c_str());
@@ -133,10 +134,10 @@ bool Load(const std::string &modulePathUtf8)
 }
 
 #ifdef _WIN32
-bool LoadW(const wchar_t *modulePathW)
+bool loadW(const wchar_t *modulePathW)
 {
-	if (IsLoaded())
-		Unload();
+	if (isLoaded())
+		unload();
 
 	if (!modulePathW || !modulePathW[0])
 		return false;
@@ -151,19 +152,19 @@ bool LoadW(const wchar_t *modulePathW)
 }
 #endif
 
-void Unload()
+void unload()
 {
-	if (!g_state.handle)
+	if (!gState.handle)
 		return;
 
-	if (g_state.deinit) {
+	if (gState.deinit) {
 		// プラグイン側のクリーンアップ（登録ハンドラ解除など）
-		g_state.deinit();
+		gState.deinit();
 	}
 
-	CloseLib(g_state.handle);
-	g_state.handle = nullptr;
-	g_state.deinit = nullptr;
+	closeLib(gState.handle);
+	gState.handle = nullptr;
+	gState.deinit = nullptr;
 }
 
 } // namespace foxclip::Host
