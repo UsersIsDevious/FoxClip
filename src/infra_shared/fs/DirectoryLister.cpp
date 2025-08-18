@@ -25,11 +25,8 @@ std::vector<std::filesystem::path> DirectoryLister::listSubdirectories(const std
 	}
 
 	for (; it != end; it.increment(ec)) {
-		if (ec) {
-			// increment での一時的な失敗はスキップして続行
-			ec.clear();
-			continue;
-		}
+		// increment(ec) でエラーが出ると it==end になりループ終了
+		// → 明示的な ec チェック/クリア処理は不要
 
 		// エントリがディレクトリかどうか（非throw）
 		std::error_code typeEc;
