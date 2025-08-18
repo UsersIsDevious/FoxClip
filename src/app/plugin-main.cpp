@@ -8,7 +8,6 @@
 #include "features/startup_check/app/StartupCheckFacade.h"
 #include "infra_shared/plugin/FoxclipPluginHost.h"
 
-
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
 
@@ -47,7 +46,6 @@ bool obs_module_load(void)
 
 	QObject::connect(act, &QAction::triggered,
 			 []() { OBS_LOG_INFO("QAction triggered (version %s)", PLUGIN_VERSION); });
-
 
 	//foxclip::Host::Load("../FoxClip-sample-plugin/build/Release/foxclip-plugin.dll");
 
