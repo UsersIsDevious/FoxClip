@@ -44,9 +44,6 @@ static QMenu *findOrCreateMenuLocked(const MenuId &topMenuId, QMenuBar *bar,
 	// 1) まず menuMap に既知の QMenu があるならそれを返す
 	auto it = menuMap().find(topMenuId);
 	if (it != menuMap().end() && it->second.menu) {
-		// タイトル更新の要望があれば反映（UIスレッド内）
-		if (visibleTitleOpt && !visibleTitleOpt->isEmpty())
-			it->second.menu->setTitle(*visibleTitleOpt);
 		return it->second.menu;
 	}
 
@@ -65,18 +62,18 @@ static QMenu *findOrCreateMenuLocked(const MenuId &topMenuId, QMenuBar *bar,
 	if (!found) {
 		found = new QMenu(bar);
 		found->setObjectName(QString::fromStdString(topMenuId));
-		if (visibleTitleOpt && !visibleTitleOpt->isEmpty())
-			found->setTitle(*visibleTitleOpt);
-		else
-			found->setTitle(QString::fromStdString(topMenuId));
 		bar->addMenu(found);
-	} else {
-		// 既存が見つかった場合でもタイトル更新があれば反映
-		if (visibleTitleOpt && !visibleTitleOpt->isEmpty())
-			found->setTitle(*visibleTitleOpt);
 	}
 
-	// 4) menuMap を上書きせずに登録 or 更新
+	// 4) タイトル更新（作成/既存の分岐から分離して一元化）
+	if (visibleTitleOpt && !visibleTitleOpt->isEmpty()) {
+		found->setTitle(*visibleTitleOpt);
+	} else if (found->title().isEmpty()) {
+		// 指定なし かつ 既存タイトル空なら ID を表示名にフォールバック
+		found->setTitle(QString::fromStdString(topMenuId));
+	}
+
+	// 5) menuMap を上書きせずに登録 or 更新（actions は保持）
 	auto entry = menuMap().try_emplace(topMenuId).first;
 	entry->second.menu = found; // actions は保持
 	return found;
