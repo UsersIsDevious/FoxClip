@@ -24,11 +24,10 @@ void logPluginSubfolders(const std::string &pluginDirName)
 		return;
 	}
 
-	const std::string pluginRoot = *fullOpt;
-	const std::filesystem::path rootPath{pluginRoot};
+	const std::filesystem::path rootPath{*fullOpt};
 	const auto subs = DirectoryLister::listSubdirectories(rootPath);
 
-	OBS_LOG_INFO("[foxclip] Plugin folder listing: %s", pluginRoot.c_str());
+	OBS_LOG_INFO("[foxclip] Plugin folder listing: %s", fullOpt->c_str());
 	if (subs.empty()) {
 		OBS_LOG_INFO("[foxclip] (no subfolders found)");
 		return;
