@@ -58,9 +58,8 @@ bool obs_module_load(void)
 	// メニュー配下にクリック可能な項目を1つ追加（押されたらログ）
 	foxclip::ui::menu::ObsMenuRegistry::addMenuAction(
 		/*topMenuId=*/kTestOriginalMenuId,
-		/*actionId=*/kTestOriginalActionLogId,
-		/*title=*/QObject::tr(u8"ログ出力"),
-		/*onTriggered=*/onLogAction);
+		/*props=*/foxclip::ui::menu::ActionProperties{kTestOriginalActionLogId, QObject::tr(u8"ログ出力"),
+							      onLogAction, false});
 
 	// Tools メニューにカスタム QAction を追加
 	const char *label = obs_module_text("Tools.Menu.FoxClip");
@@ -85,5 +84,7 @@ bool obs_module_load(void)
 
 void obs_module_unload(void)
 {
+	// 追加: 生成した QMenu/QAction を確実に破棄
+	foxclip::ui::menu::ObsMenuRegistry::teardownAll();
 	OBS_LOG_INFO("plugin unloaded");
 }

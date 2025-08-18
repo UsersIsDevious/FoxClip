@@ -128,11 +128,10 @@ void ObsMenuRegistry::ensureTopLevelMenu(const MenuId &topMenuId, const QString 
 	});
 }
 
-void ObsMenuRegistry::addMenuAction(const MenuId &topMenuId, const ActionId &actionId, const QString &title,
-				    UiVoidFn onTriggered, bool checkable)
+void ObsMenuRegistry::addMenuAction(const MenuId &topMenuId, ActionProperties props)
 {
 	// ★ UIスレッド内で「メニューの存在保証→アクション追加」までを一気に行う
-	callUi([topMenuId, actionId, title, onTriggered = std::move(onTriggered), checkable]() mutable {
+	callUi([topMenuId, props = std::move(props)]() mutable {
 		auto *mw = mainWindow();
 		if (!mw)
 			return;
@@ -145,23 +144,23 @@ void ObsMenuRegistry::addMenuAction(const MenuId &topMenuId, const ActionId &act
 		// 一元化: メニューを取得（必要なら作成）
 		auto &rec = findOrCreateMenuLocked(topMenuId, bar, /*visibleTitleOpt=*/nullptr);
 
-		auto aIt = rec.actions.find(actionId);
+		auto aIt = rec.actions.find(props.actionId);
 		if (aIt != rec.actions.end()) {
 			if (aIt->second.action) {
-				aIt->second.action->setText(title);
-				aIt->second.callback = std::move(onTriggered);
+				aIt->second.action->setText(props.title);
+				aIt->second.callback = std::move(props.onTriggered);
 				return;
 			} else {
 				rec.actions.erase(aIt);
 			}
 		}
 
-		QAction *act = new QAction(title, rec.menu);
-		act->setCheckable(checkable);
+		QAction *act = new QAction(props.title, rec.menu);
+		act->setCheckable(props.checkable);
 
 		// ★ topMenuId もキャプチャして O(1) で該当アクションを引く
 		// コールバックはロック外で実行（デッドロック/ブロッキングを回避）
-		QObject::connect(act, &QAction::triggered, [topMenuId, actionId](bool) {
+		QObject::connect(act, &QAction::triggered, [topMenuId, actionId = props.actionId](bool) {
 			UiVoidFn callback;
 			{
 				std::lock_guard<std::mutex> lock(mtx());
@@ -179,7 +178,7 @@ void ObsMenuRegistry::addMenuAction(const MenuId &topMenuId, const ActionId &act
 		});
 
 		rec.menu->addAction(act);
-		rec.actions.emplace(actionId, ActionRecord{act, std::move(onTriggered)});
+		rec.actions.emplace(props.actionId, ActionRecord{act, std::move(props.onTriggered)});
 	});
 }
 

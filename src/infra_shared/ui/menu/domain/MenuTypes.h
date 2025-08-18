@@ -9,4 +9,12 @@ using MenuId = std::string;   // トップレベルメニュー識別子
 using ActionId = std::string; // QAction識別子
 using UiVoidFn = foxclip::ui::common::UiVoidFn;
 
+// QAction の属性をまとめた構造体
+struct ActionProperties {
+	ActionId actionId;
+	QString title;
+	UiVoidFn onTriggered;
+	bool checkable = false;
+};
+
 } // namespace foxclip::ui::menu

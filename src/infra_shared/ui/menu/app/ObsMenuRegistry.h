@@ -9,9 +9,8 @@ class ObsMenuRegistry {
 public:
 	static void ensureTopLevelMenu(const MenuId &topMenuId, const QString &visibleTitle = QString());
 
-	static void addMenuAction(const MenuId &topMenuId, const ActionId &actionId, const QString &title,
-				  UiVoidFn onTriggered, bool checkable = false);
-
+	// 引数を ActionProperties に集約
+	static void addMenuAction(const MenuId &topMenuId, ActionProperties props);
 	static void teardownAll();
 
 private:
