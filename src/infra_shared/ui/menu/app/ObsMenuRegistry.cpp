@@ -105,16 +105,6 @@ inline QMainWindow *mainWindow()
 
 void ObsMenuRegistry::ensureTopLevelMenu(const MenuId &topMenuId, const QString &visibleTitle)
 {
-	{
-		std::lock_guard<std::mutex> lock(mtx());
-		if (menuMap().count(topMenuId)) {
-			if (auto m = menuMap().at(topMenuId).menu) {
-				if (!visibleTitle.isEmpty())
-					m->setTitle(visibleTitle);
-			}
-			return;
-		}
-	}
 
 	// UI操作は常にUIスレッドへ（参照キャプチャは避けて値キャプチャ）
 	callUi([topMenuId, visibleTitle]() {
@@ -127,6 +117,7 @@ void ObsMenuRegistry::ensureTopLevelMenu(const MenuId &topMenuId, const QString 
 
 		std::lock_guard<std::mutex> lock(mtx());
 
+		// 検索・作成・タイトル更新を一元処理
 		(void)findOrCreateMenuLocked(topMenuId, bar, &visibleTitle);
 	});
 }
@@ -165,7 +156,7 @@ void ObsMenuRegistry::addMenuAction(const MenuId &topMenuId, const ActionId &act
 
 		// ★ topMenuId もキャプチャして O(1) で該当アクションを引く
 		QObject::connect(act, &QAction::triggered, [topMenuId, actionId](bool) {
-			std::lock_guard<std::mutex> lock2(mtx());
+			std::lock_guard<std::mutex> lock(mtx());
 			const auto menuIt = menuMap().find(topMenuId);
 			if (menuIt == menuMap().end())
 				return;
