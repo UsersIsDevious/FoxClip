@@ -36,6 +36,52 @@ std::mutex &mtx()
 	return s;
 }
 
+// 前提: UIスレッド上で呼ばれること / mtx() がロック済みであること
+// 役割: menuMap と実UI(QMenuBar)の両方を見て、対象トップメニューを見つける or 作成して登録する
+static QMenu *findOrCreateMenuLocked(const MenuId &topMenuId, QMenuBar *bar,
+				     const QString *visibleTitleOpt /*nullable*/)
+{
+	// 1) まず menuMap に既知の QMenu があるならそれを返す
+	auto it = menuMap().find(topMenuId);
+	if (it != menuMap().end() && it->second.menu) {
+		// タイトル更新の要望があれば反映（UIスレッド内）
+		if (visibleTitleOpt && !visibleTitleOpt->isEmpty())
+			it->second.menu->setTitle(*visibleTitleOpt);
+		return it->second.menu;
+	}
+
+	// 2) QMenuBar 上に既存があるか objectName で探索
+	QMenu *found = nullptr;
+	for (auto *a : bar->actions()) {
+		if (auto *m = a->menu()) {
+			if (m->objectName() == QString::fromStdString(topMenuId)) {
+				found = m;
+				break;
+			}
+		}
+	}
+
+	// 3) 無ければ作成
+	if (!found) {
+		found = new QMenu(bar);
+		found->setObjectName(QString::fromStdString(topMenuId));
+		if (visibleTitleOpt && !visibleTitleOpt->isEmpty())
+			found->setTitle(*visibleTitleOpt);
+		else
+			found->setTitle(QString::fromStdString(topMenuId));
+		bar->addMenu(found);
+	} else {
+		// 既存が見つかった場合でもタイトル更新があれば反映
+		if (visibleTitleOpt && !visibleTitleOpt->isEmpty())
+			found->setTitle(*visibleTitleOpt);
+	}
+
+	// 4) menuMap を上書きせずに登録 or 更新
+	auto entry = menuMap().try_emplace(topMenuId).first;
+	entry->second.menu = found; // actions は保持
+	return found;
+}
+
 // UI スレッドで func を実行（Qt 標準ディスパッチ版）
 inline void callUi(std::function<void()> func)
 {
@@ -73,7 +119,8 @@ void ObsMenuRegistry::ensureTopLevelMenu(const MenuId &topMenuId, const QString 
 		}
 	}
 
-	callUi([=]() {
+	// UI操作は常にUIスレッドへ（参照キャプチャは避けて値キャプチャ）
+	callUi([topMenuId, visibleTitle]() {
 		auto *mw = mainWindow();
 		if (!mw)
 			return;
@@ -81,30 +128,9 @@ void ObsMenuRegistry::ensureTopLevelMenu(const MenuId &topMenuId, const QString 
 		if (!bar)
 			return;
 
-		// 既存検索（objectName）
-		for (auto *act : bar->actions()) {
-			if (auto *menu = act->menu()) {
-				if (menu->objectName() == QString::fromStdString(topMenuId)) {
-					std::lock_guard<std::mutex> lock(mtx());
-					// 既存 actions を保持したまま menu だけ更新
-					menuMap()[topMenuId].menu = menu;
-					if (!visibleTitle.isEmpty())
-						menu->setTitle(visibleTitle);
-					return;
-				}
-			}
-		}
-
-		// 新規作成
-		auto *menu = new QMenu(bar);
-		menu->setObjectName(QString::fromStdString(topMenuId));
-		menu->setTitle(visibleTitle.isEmpty() ? QString::fromStdString(topMenuId) : visibleTitle);
-		bar->addMenu(menu);
-
 		std::lock_guard<std::mutex> lock(mtx());
-		// 上書き禁止：レコードが無ければ作成、あれば menu のみ更新
-		auto it = menuMap().try_emplace(topMenuId).first;
-		it->second.menu = menu;
+
+		(void)findOrCreateMenuLocked(topMenuId, bar, &visibleTitle);
 	});
 }
 
@@ -121,33 +147,10 @@ void ObsMenuRegistry::addMenuAction(const MenuId &topMenuId, const ActionId &act
 			return;
 
 		std::lock_guard<std::mutex> lock(mtx());
-		// まず menuMap を確認
-		auto it = menuMap().find(topMenuId);
-		if (it == menuMap().end() || !it->second.menu) {
-			// メニューバー上に既存があるか objectName で探索
-			QMenu *found = nullptr;
-			for (auto *a : bar->actions()) {
-				if (auto *m = a->menu()) {
-					if (m->objectName() == QString::fromStdString(topMenuId)) {
-						found = m;
-						break;
-					}
-				}
-			}
-			if (!found) {
-				// 新規作成
-				found = new QMenu(bar);
-				found->setObjectName(QString::fromStdString(topMenuId));
-				found->setTitle(QString::fromStdString(topMenuId));
-				bar->addMenu(found);
-			}
 
-			// 既存エントリは保持、無ければ生成
-			it = menuMap().try_emplace(topMenuId).first;
-			it->second.menu = found;
-		}
-
-		auto &rec = it->second;
+		// 一元化: メニューを取得（必要なら作成）
+		(void)findOrCreateMenuLocked(topMenuId, bar, /*visibleTitleOpt=*/nullptr);
+		auto &rec = menuMap().find(topMenuId)->second;
 
 		auto aIt = rec.actions.find(actionId);
 		if (aIt != rec.actions.end()) {
