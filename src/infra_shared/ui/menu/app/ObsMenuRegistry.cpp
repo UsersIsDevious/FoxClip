@@ -108,13 +108,39 @@ void ObsMenuRegistry::ensureTopLevelMenu(const MenuId &topMenuId, const QString 
 void ObsMenuRegistry::addMenuAction(const MenuId &topMenuId, const ActionId &actionId, const QString &title,
 				    UiVoidFn onTriggered, bool checkable)
 {
-	ensureTopLevelMenu(topMenuId);
-
-	callUi([=]() mutable {
-		std::lock_guard<std::mutex> lock(mtx());
-		auto it = menuMap().find(topMenuId);
-		if (it == menuMap().end() || !it->second.menu)
+	// ★ UIスレッド内で「メニューの存在保証→アクション追加」までを一気に行う
+	callUi([topMenuId, actionId, title, onTriggered = std::move(onTriggered), checkable]() mutable {
+		auto *mw = mainWindow();
+		if (!mw)
 			return;
+		auto *bar = mw->menuBar();
+		if (!bar)
+			return;
+
+		std::lock_guard<std::mutex> lock(mtx());
+		// まず menuMap を確認
+		auto it = menuMap().find(topMenuId);
+		if (it == menuMap().end() || !it->second.menu) {
+			// メニューバー上に既存があるか objectName で探索
+			QMenu *found = nullptr;
+			for (auto *a : bar->actions()) {
+				if (auto *m = a->menu()) {
+					if (m->objectName() == QString::fromStdString(topMenuId)) {
+						found = m;
+						break;
+					}
+				}
+			}
+			if (!found) {
+				// 新規作成
+				found = new QMenu(bar);
+				found->setObjectName(QString::fromStdString(topMenuId));
+				found->setTitle(QString::fromStdString(topMenuId));
+				bar->addMenu(found);
+			}
+			menuMap()[topMenuId] = MenuRecord{found, {}};
+			it = menuMap().find(topMenuId);
+		}
 
 		auto &rec = it->second;
 
@@ -132,14 +158,15 @@ void ObsMenuRegistry::addMenuAction(const MenuId &topMenuId, const ActionId &act
 		QAction *act = new QAction(title, rec.menu);
 		act->setCheckable(checkable);
 
-		QObject::connect(act, &QAction::triggered, [actionId](bool) {
+		// ★ topMenuId もキャプチャして O(1) で該当アクションを引く
+		QObject::connect(act, &QAction::triggered, [topMenuId, actionId](bool) {
 			std::lock_guard<std::mutex> lock2(mtx());
-			for (auto &[mid, mrec] : menuMap()) {
-				auto f = mrec.actions.find(actionId);
-				if (f != mrec.actions.end() && f->second.callback) {
-					f->second.callback(); // UIスレッド内
-					break;
-				}
+			const auto menuIt = menuMap().find(topMenuId);
+			if (menuIt == menuMap().end())
+				return;
+			const auto actionIt = menuIt->second.actions.find(actionId);
+			if (actionIt != menuIt->second.actions.end() && actionIt->second.callback) {
+				actionIt->second.callback(); // UIスレッド内
 			}
 		});
 
