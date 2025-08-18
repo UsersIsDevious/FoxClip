@@ -51,8 +51,7 @@ bool supportsSdk(const Semver &host, const Semver &sdk, const CompatPolicy &p)
 		return false;
 	if (p.requireHostMinorGreaterEqual && host.minor < sdk.minor)
 		return false;
-	(void)p;
-	return true; // patch は無視
+	return true; // patch は無視（p.ignorePatch は設計上デフォルトで無視）
 }
 
 bool satisfiesMinHost(const Semver &host, const Semver &minHost)

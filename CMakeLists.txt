@@ -41,14 +41,8 @@ option(FOXCLIP_FETCH_NLOHMANN_JSON "Fetch nlohmann/json via FetchContent" ON)
 
 if(FOXCLIP_FETCH_NLOHMANN_JSON)
   include(FetchContent)
-  FetchContent_Declare(
-    nlohmann_json
-    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
-  )
+  FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
   FetchContent_MakeAvailable(nlohmann_json)
-endif()
-
-if(FOXCLIP_FETCH_NLOHMANN_JSON)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 endif()
 

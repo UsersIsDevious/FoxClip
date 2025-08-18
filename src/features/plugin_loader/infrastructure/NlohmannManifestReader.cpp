@@ -74,11 +74,11 @@ ManifestReadResult NlohmannManifestReader::readFromDir(const std::string &plugin
 				m.locales.emplace_back(e.get<std::string>());
 	}
 
-	for (auto it = j["entry"].begin(); it != j["entry"].end(); ++it) {
-		if (it.value().is_string()) {
-			const auto rel = it.value().get<std::string>();
+	for (const auto &[key, value] : j["entry"].items()) {
+		if (value.is_string()) {
+			const auto rel = value.get<std::string>();
 			if (!rel.empty())
-				m.entry[it.key()] = rel;
+				m.entry[key] = rel;
 		}
 	}
 	if (m.entry.empty())

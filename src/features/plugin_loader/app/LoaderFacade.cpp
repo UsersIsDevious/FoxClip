@@ -51,14 +51,6 @@ LoadOneResult LoaderFacade::loadOneImpl(const std::string &pluginDirUtf8, const 
 
 	// 2) 仕様検証（SDK互換・min_host_version・エントリ存在）
 	auto in = makeValidationInput();
-#if defined(_WIN32)
-	const char *platform = "windows";
-#elif defined(__APPLE__)
-	const char *platform = "macos";
-#else
-	const char *platform = "linux";
-#endif
-	in.platformKey = platform;
 
 	auto vr = domain::validate(*rr.manifest, in);
 	if (!vr.ok) {
@@ -71,9 +63,9 @@ LoadOneResult LoaderFacade::loadOneImpl(const std::string &pluginDirUtf8, const 
 	}
 
 	// 3) エントリのフルパスを組み立て
-	auto rel = rr.manifest->entryFor(in.platformKey);
+	const auto rel = rr.manifest->entryFor(in.platformKey);
 	if (!rel || rel->empty()) {
-		return LoadOneResult::failureOf(LoadError{pluginDirUtf8, "entry path missing for platform"});
+		return LoadOneResult::failureOf(LoadError{pluginDirUtf8, ("entry path missing for platform: " + in.platformKey)});
 	}
 	fs::path modulePath = u8(pluginDirUtf8) / u8(*rel);
 
