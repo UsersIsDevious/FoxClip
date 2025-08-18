@@ -1,6 +1,8 @@
 // src/infra_shared/ui/menu/domain/MenuTypes.h
 #pragma once
 #include <string>
+#include <string>
+#include <QString>
 #include "infra_shared/ui/common/domain/UiTypes.h"
 
 namespace foxclip::ui::menu {
