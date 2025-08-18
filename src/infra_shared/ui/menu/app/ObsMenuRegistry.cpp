@@ -38,20 +38,25 @@ std::mutex &mtx()
 
 // 前提: UIスレッド上で呼ばれること / mtx() がロック済みであること
 // 役割: menuMap と実UI(QMenuBar)の両方を見て、対象トップメニューを見つける or 作成して登録する
-static QMenu *findOrCreateMenuLocked(const MenuId &topMenuId, QMenuBar *bar,
-				     const QString *visibleTitleOpt /*nullable*/)
+// 戻り値: menuMap 内の MenuRecord 参照（actions を保持したまま menu を設定/更新）
+static MenuRecord &findOrCreateMenuLocked(const MenuId &topMenuId, QMenuBar *bar,
+					  const QString *visibleTitleOpt /*nullable*/)
 {
 	// 1) まず menuMap に既知の QMenu があるならそれを返す
 	auto it = menuMap().find(topMenuId);
 	if (it != menuMap().end() && it->second.menu) {
-		return it->second.menu;
+		// タイトル更新が要ればこの時点で反映
+		if (visibleTitleOpt && !visibleTitleOpt->isEmpty())
+			it->second.menu->setTitle(*visibleTitleOpt);
+		return it->second;
 	}
 
 	// 2) QMenuBar 上に既存があるか objectName で探索
 	QMenu *found = nullptr;
+	const auto qTopMenuId = QString::fromStdString(topMenuId);
 	for (auto *a : bar->actions()) {
 		if (auto *m = a->menu()) {
-			if (m->objectName() == QString::fromStdString(topMenuId)) {
+			if (m->objectName() == qTopMenuId) {
 				found = m;
 				break;
 			}
@@ -70,13 +75,13 @@ static QMenu *findOrCreateMenuLocked(const MenuId &topMenuId, QMenuBar *bar,
 		found->setTitle(*visibleTitleOpt);
 	} else if (found->title().isEmpty()) {
 		// 指定なし かつ 既存タイトル空なら ID を表示名にフォールバック
-		found->setTitle(QString::fromStdString(topMenuId));
+		found->setTitle(qTopMenuId);
 	}
 
 	// 5) menuMap を上書きせずに登録 or 更新（actions は保持）
 	auto entry = menuMap().try_emplace(topMenuId).first;
 	entry->second.menu = found; // actions は保持
-	return found;
+	return entry->second;
 }
 
 // UI スレッドで func を実行（Qt 標準ディスパッチ版）
@@ -137,8 +142,7 @@ void ObsMenuRegistry::addMenuAction(const MenuId &topMenuId, const ActionId &act
 		std::lock_guard<std::mutex> lock(mtx());
 
 		// 一元化: メニューを取得（必要なら作成）
-		(void)findOrCreateMenuLocked(topMenuId, bar, /*visibleTitleOpt=*/nullptr);
-		auto &rec = menuMap().find(topMenuId)->second;
+		auto &rec = findOrCreateMenuLocked(topMenuId, bar, /*visibleTitleOpt=*/nullptr);
 
 		auto aIt = rec.actions.find(actionId);
 		if (aIt != rec.actions.end()) {
