@@ -6,7 +6,7 @@
 #include <stdarg.h>
 
 /* 既定は INFO 以上 */
-static FoxclipLogLevel gMinLevel = kLogInfo;
+static FoxclipLogLevel minLevel = kLogInfo;
 
 /* レベル変換（ObsLogger 側の LOG_* に合わせる） */
 static inline int levelToObs(FoxclipLogLevel lv)
@@ -39,13 +39,13 @@ static inline int levelToObs(FoxclipLogLevel lv)
 
 void FOXCLIP_CALL foxclipLogSetMinLevel(FoxclipLogLevel level)
 {
-	gMinLevel = level;
+	minLevel = level;
 }
 
 /* va_list 版 */
 void FOXCLIP_CALL foxclipLogVa(FoxclipLogLevel level, const char *tag, const char *fmt, va_list args)
 {
-	if (level < gMinLevel)
+	if (level < minLevel)
 		return;
 
 	/* 1) 本文長を見積もる（args を消費しないようコピー） */
@@ -94,7 +94,7 @@ void FOXCLIP_CALL foxclipLogVa(FoxclipLogLevel level, const char *tag, const cha
 /* printf 互換 */
 void FOXCLIP_CALL foxclipLog(FoxclipLogLevel level, const char *tag, const char *fmt, ...)
 {
-	if (level < gMinLevel)
+	if (level < minLevel)
 		return;
 
 	va_list args;

@@ -58,7 +58,7 @@ struct State {
 } state;
 
 /* ホスト側がプラグインへ渡す vtable を構築 */
-static FoxclipApi MakeApi()
+static FoxclipApi makeApi()
 {
 	FoxclipApiV1 api{};
 	api.abi = FOXCLIP_API_ABI;
@@ -73,7 +73,7 @@ static FoxclipApi MakeApi()
 }
 
 /* 実際のロード + init 呼び出し（ハンドルが既にある前提） */
-static bool InitWithHandle(LibHandle h)
+static bool initWithHandle(LibHandle h)
 {
 	if (!h)
 		return false;
@@ -82,7 +82,7 @@ static bool InitWithHandle(LibHandle h)
 	if (!init)
 		return false;
 
-	FoxclipApi api = MakeApi();
+	FoxclipApi api = makeApi();
 	if (!init(&api))
 		return false;
 
@@ -116,7 +116,7 @@ bool load(const std::string &modulePathUtf8)
 	HMODULE h = ::LoadLibraryW(w.c_str());
 	if (!h)
 		return false;
-	if (!InitWithHandle(h)) {
+	if (!initWithHandle(h)) {
 		::FreeLibrary(h);
 		return false;
 	}
@@ -125,7 +125,7 @@ bool load(const std::string &modulePathUtf8)
 	void *h = ::dlopen(modulePathUtf8.c_str(), RTLD_NOW);
 	if (!h)
 		return false;
-	if (!InitWithHandle(h)) {
+	if (!initWithHandle(h)) {
 		::dlclose(h);
 		return false;
 	}
@@ -144,7 +144,7 @@ bool loadW(const wchar_t *modulePathW)
 	HMODULE h = ::LoadLibraryW(modulePathW);
 	if (!h)
 		return false;
-	if (!InitWithHandle(h)) {
+	if (!initWithHandle(h)) {
 		::FreeLibrary(h);
 		return false;
 	}
