@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 
-namespace foxclip::domain {
+namespace foxclip::startup_check::domain {
 struct DirectoryPolicy {
 	std::string requiredName;
 };
-} // namespace foxclip::domain
+} // namespace foxclip::startup_check::domain

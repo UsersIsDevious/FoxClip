@@ -18,11 +18,11 @@ bool obs_module_load(void)
 	OBS_LOG_INFO("plugin loaded successfully (version %s)", PLUGIN_VERSION);
 
 	//checking plugins directory
-	using foxclip::features::startup_check::app::StartupCheckFacade;
-	using foxclip::features::startup_check::infrastructure::StdFsDirectoryChecker;
+	using foxclip::startup_check::app::StartupCheckFacade;
+	using foxclip::startup_check::infrastructure::StdFsDirectoryChecker;
 
 	auto checker = std::make_unique<StdFsDirectoryChecker>();
-	StartupCheckFacade facade(std::move(checker), ".", "foxclip-plugins");
+	StartupCheckFacade facade(std::move(checker), "foxclip-plugins");
 	auto r = facade.run();
 	if (!r.ok) {
 		// Log error Directory does not exist
