@@ -54,7 +54,7 @@ constexpr const char *kDeinitSym = "foxclip_plugin_deinit";
 /* ロード状態 */
 struct State {
 	LibHandle handle = nullptr;
-	foxclipPluginDeinitFn deinit = nullptr;
+	FoxclipPluginDeinitFn deinit = nullptr;
 } state;
 
 /* ホスト側がプラグインへ渡す vtable を構築 */
@@ -78,7 +78,7 @@ static bool initWithHandle(LibHandle h)
 	if (!h)
 		return false;
 
-	auto init = reinterpret_cast<foxclipPluginInitFn>(resolveSym(h, kInitSym));
+	auto init = reinterpret_cast<FoxclipPluginInitFn>(resolveSym(h, kInitSym));
 	if (!init)
 		return false;
 
@@ -87,7 +87,7 @@ static bool initWithHandle(LibHandle h)
 		return false;
 
 	// deinit は任意（存在しない実装も許容）
-	auto deinit = reinterpret_cast<foxclipPluginDeinitFn>(resolveSym(h, kDeinitSym));
+	auto deinit = reinterpret_cast<FoxclipPluginDeinitFn>(resolveSym(h, kDeinitSym));
 
 	state.handle = h;
 	state.deinit = deinit;

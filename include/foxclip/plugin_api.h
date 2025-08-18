@@ -21,8 +21,8 @@ typedef struct FoxclipApiV1 {
 typedef FoxclipApiV1 FoxclipApi;
 
 /* プラグインがエクスポートすべき初期化/終了関数 */
-typedef bool(FOXCLIP_CALL *foxclipPluginInitFn)(const FoxclipApi *api);
-typedef void(FOXCLIP_CALL *foxclipPluginDeinitFn)(void);
+typedef bool(FOXCLIP_CALL *FoxclipPluginInitFn)(const FoxclipApi *api);
+typedef void(FOXCLIP_CALL *FoxclipPluginDeinitFn)(void);
 
 /* vtable を使うプラグイン側の共有ポインタ（定義はプラグイン側） */
 #if defined(FOXCLIP_USE_VTABLE)
