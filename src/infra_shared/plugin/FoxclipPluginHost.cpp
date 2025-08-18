@@ -55,7 +55,7 @@ constexpr const char *kDeinitSym = "foxclip_plugin_deinit";
 struct State {
 	LibHandle handle = nullptr;
 	foxclipPluginDeinitFn deinit = nullptr;
-} gState;
+} state;
 
 /* ホスト側がプラグインへ渡す vtable を構築 */
 static FoxclipApi MakeApi()
@@ -89,8 +89,8 @@ static bool InitWithHandle(LibHandle h)
 	// deinit は任意（存在しない実装も許容）
 	auto deinit = reinterpret_cast<foxclipPluginDeinitFn>(resolveSym(h, kDeinitSym));
 
-	gState.handle = h;
-	gState.deinit = deinit;
+	state.handle = h;
+	state.deinit = deinit;
 	return true;
 }
 
@@ -100,7 +100,7 @@ namespace foxclip::Host {
 
 bool isLoaded()
 {
-	return gState.handle != nullptr;
+	return state.handle != nullptr;
 }
 
 bool load(const std::string &modulePathUtf8)
@@ -154,17 +154,17 @@ bool loadW(const wchar_t *modulePathW)
 
 void unload()
 {
-	if (!gState.handle)
+	if (!state.handle)
 		return;
 
-	if (gState.deinit) {
+	if (state.deinit) {
 		// プラグイン側のクリーンアップ（登録ハンドラ解除など）
-		gState.deinit();
+		state.deinit();
 	}
 
-	closeLib(gState.handle);
-	gState.handle = nullptr;
-	gState.deinit = nullptr;
+	closeLib(state.handle);
+	state.handle = nullptr;
+	state.deinit = nullptr;
 }
 
 } // namespace foxclip::Host
