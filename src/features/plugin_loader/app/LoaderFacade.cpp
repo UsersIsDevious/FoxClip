@@ -65,7 +65,8 @@ LoadOneResult LoaderFacade::loadOneImpl(const std::string &pluginDirUtf8, const 
 	// 3) エントリのフルパスを組み立て
 	const auto rel = rr.manifest->entryFor(in.platformKey);
 	if (!rel || rel->empty()) {
-		return LoadOneResult::failureOf(LoadError{pluginDirUtf8, ("entry path missing for platform: " + in.platformKey)});
+		return LoadOneResult::failureOf(
+			LoadError{pluginDirUtf8, ("entry path missing for platform: " + in.platformKey)});
 	}
 	fs::path modulePath = u8(pluginDirUtf8) / u8(*rel);
 
