@@ -1,40 +1,35 @@
 #include "foxclip/log/log.h"
-#include "infra_shared/log/ObsLogger.h"
+#include "infra_shared/log/ObsLogger.h" /* 既存の依存を流用 */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 /* 既定は INFO 以上 */
-static fc_log_level_t g_min_level = FC_LOG_INFO;
+static FoxclipLogLevel gMinLevel = kLogInfo;
 
-void FC_CALL fc_log_set_min_level(fc_log_level_t level)
-{
-	g_min_level = level;
-}
-
-/* fc_log_level_t -> ObsLogger の level へ変換 */
-static inline int level_to_obs(fc_log_level_t lv)
+/* レベル変換（ObsLogger 側の LOG_* に合わせる） */
+static inline int levelToObs(FoxclipLogLevel lv)
 {
 #if defined(LOG_DEBUG)
 	switch (lv) {
-	case FC_LOG_TRACE:
-	case FC_LOG_DEBUG:
+	case kLogTrace:
+	case kLogDebug:
 		return LOG_DEBUG;
-	case FC_LOG_INFO:
+	case kLogInfo:
 		return LOG_INFO;
-	case FC_LOG_WARN:
+	case kLogWarn:
 		return LOG_WARNING;
-	case FC_LOG_ERROR:
+	case kLogError:
 		return LOG_ERROR;
 	default:
 		return LOG_INFO;
 	}
 #else
-	/* LOG_DEBUG が無い実装向けのフォールバック */
 	switch (lv) {
-	case FC_LOG_WARN:
+	case kLogWarn:
 		return LOG_WARNING;
-	case FC_LOG_ERROR:
+	case kLogError:
 		return LOG_ERROR;
 	default:
 		return LOG_INFO;
@@ -42,76 +37,68 @@ static inline int level_to_obs(fc_log_level_t lv)
 #endif
 }
 
-/* 可変長引数版（va_list） */
-void FC_CALL fc_log_v(fc_log_level_t level, const char *tag, const char *fmt, va_list args)
+void FOXCLIP_CALL foxclipLogSetMinLevel(FoxclipLogLevel level)
 {
-	if (level < g_min_level)
+	gMinLevel = level;
+}
+
+/* va_list 版 */
+void FOXCLIP_CALL foxclipLogVa(FoxclipLogLevel level, const char *tag, const char *fmt, va_list args)
+{
+	if (level < gMinLevel)
 		return;
 
-	/* 1) 本文長を見積もる（args は消費しないよう必ずコピーを使う） */
-	va_list args_copy;
-	va_copy(args_copy, args);
+	/* 1) 本文長を見積もる（args を消費しないようコピー） */
+	va_list argsCopy;
+	va_copy(argsCopy, args);
 
 #if defined(_MSC_VER)
-	/* _vscprintf は終端NULを含まない必要サイズを返す（負ならエラー） */
-	int body_len = _vscprintf(fmt, args_copy);
+	int bodyLen = _vscprintf(fmt, argsCopy); /* NUL 含まず */
 #else
-	int body_len = vsnprintf(NULL, 0, fmt, args_copy);
+	int bodyLen = vsnprintf(NULL, 0, fmt, argsCopy);
 #endif
-	va_end(args_copy);
+	va_end(argsCopy);
 
-	if (body_len < 0) {
+	if (bodyLen < 0)
 		return; /* フォーマットエラー */
+
+	/* 2) "[tag] " の長さ（tag が NULL/空なら 0） */
+	const char *tagPrefix = (tag && tag[0]) ? tag : NULL;
+	int prefixLen = 0;
+	if (tagPrefix) {
+		int n = snprintf(NULL, 0, "[%s] ", tagPrefix);
+		prefixLen = (n > 0) ? n : 0;
 	}
 
-	/* 2) プレフィックス("[tag] ")長を見積もる（tag が NULL/空なら0） */
-	const char *tag_prefix = (tag && tag[0]) ? tag : NULL;
-	int prefix_len = 0;
-	if (tag_prefix) {
-		/* ここで "] " を含む完全な形を一発で作るため、余計な ']' は入れない */
-		int n = snprintf(NULL, 0, "[%s] ", tag_prefix);
-		if (n > 0)
-			prefix_len = n;
-		else
-			prefix_len = 0; /* 念のため */
-	}
-
-	/* 3) 合計サイズを計算して1回の malloc で確保（+1はNUL） */
-	size_t total_len = (size_t)prefix_len + (size_t)body_len;
-	char *line = (char *)malloc(total_len + 1);
-	if (!line) {
+	/* 3) 一括確保（+1 は終端 NUL） */
+	size_t totalLen = (size_t)prefixLen + (size_t)bodyLen;
+	char *line = (char *)malloc(totalLen + 1);
+	if (!line)
 		return;
-	}
 
-	/* 4) 実際に書き込む：先にプレフィックス、続いて本文 */
+	/* 4) 出力文字列を組み立てる */
 	int written = 0;
-	if (tag_prefix) {
-		/* prefix_len は NUL を含まない長さなので、size は +1 でOK */
-		written = snprintf(line, (size_t)prefix_len + 1, "[%s] ", tag_prefix);
-		if (written < 0) {
-			/* 万一失敗したらプレフィックス無しで本文だけ出す */
+	if (tagPrefix) {
+		written = snprintf(line, (size_t)prefixLen + 1, "[%s] ", tagPrefix);
+		if (written < 0)
 			written = 0;
-		}
 	}
+	(void)vsnprintf(line + written, (size_t)bodyLen + 1, fmt, args);
 
-	/* 本文は vsnprintf で後ろに連結。上では args_copy を消費しただけなので args は未消費 */
-	/* body_len は NUL を含まない長さなので、書き込みバッファは +1 */
-	(void)vsnprintf(line + written, (size_t)body_len + 1, fmt, args);
-
-	/* 5) 出力（整形済みを "%s" で渡す） */
-	obs_log(level_to_obs(level), "%s", line);
+	/* 5) 出力 */
+	obs_log(levelToObs(level), "%s", line);
 
 	free(line);
 }
 
-/* printf 互換版 */
-void FC_CALL fc_log(fc_log_level_t level, const char *tag, const char *fmt, ...)
+/* printf 互換 */
+void FOXCLIP_CALL foxclipLog(FoxclipLogLevel level, const char *tag, const char *fmt, ...)
 {
-	if (level < g_min_level)
+	if (level < gMinLevel)
 		return;
 
 	va_list args;
 	va_start(args, fmt);
-	fc_log_v(level, tag, fmt, args);
+	foxclipLogVa(level, tag, fmt, args);
 	va_end(args);
 }

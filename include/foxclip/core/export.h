@@ -3,23 +3,23 @@
 /* 可視性マクロ */
 #if defined(_WIN32) || defined(__CYGWIN__)
 #if defined(FOXCLIP_STATIC)
-#define FC_API
+#define FOXCLIP_API
 #else
 #if defined(FOXCLIP_BUILDING)
-#define FC_API __declspec(dllexport)
+#define FOXCLIP_API __declspec(dllexport)
 #else
-#define FC_API __declspec(dllimport)
+#define FOXCLIP_API __declspec(dllimport)
 #endif
 #endif
-#define FC_CALL __cdecl
+#define FOXCLIP_CALL __cdecl
 #else
-#define FC_API __attribute__((visibility("default")))
-#define FC_CALL
+#define FOXCLIP_API  __attribute__((visibility("default")))
+#define FOXCLIP_CALL
 #endif
 
 /* C/C++ 両対応 */
 #ifdef __cplusplus
-#define FC_EXTERN extern "C"
+#define FOXCLIP_EXTERN extern "C"
 #else
-#define FC_EXTERN extern
+#define FOXCLIP_EXTERN extern
 #endif

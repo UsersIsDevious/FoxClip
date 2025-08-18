@@ -1,7 +1,7 @@
 #include "FoxclipPluginHost.h"
 
-#include "foxclip/plugin_api.h" // fc_api_t / init/deinit の型
-#include "foxclip/log/log.h"    // 実装側なので通常宣言（FC_USE_VTABLEは無関係）
+#include "foxclip/plugin_api.h" // FoxclipApi / init/deinit の型
+#include "foxclip/log/log.h"    // 実装側なので通常宣言（FOXCLIP_USE_VTABLEは無関係）
 
 #include <cstring>
 #include <utility>
@@ -53,21 +53,21 @@ constexpr const char *kDeinitSym = "foxclip_plugin_deinit";
 /* ロード状態 */
 struct State {
 	LibHandle handle = nullptr;
-	foxclip_plugin_deinit_fn deinit = nullptr;
+	foxclipPluginDeinitFn deinit = nullptr;
 } g_state;
 
 /* ホスト側がプラグインへ渡す vtable を構築 */
-static fc_api_t MakeApi()
+static FoxclipApi MakeApi()
 {
-	fc_api_t api{};
-	api.abi = FC_API_ABI;
-	api.log_set_min_level = &fc_log_set_min_level;
-	api.log = &fc_log;
-	api.log_v = &fc_log_v;
+	FoxclipApiV1 api{};
+	api.abi = FOXCLIP_API_ABI;
+	api.logSetMinLevel = &foxclipLogSetMinLevel;
+	api.log = &foxclipLog;
+	api.logVa = &foxclipLogVa;
 
 	// 将来イベントAPIを実装したらここでセット
-	api.register_event_handler = nullptr;
-	api.unregister_event_handler = nullptr;
+	api.registerEventHandler = nullptr;
+	api.unregisterEventHandler = nullptr;
 	return api;
 }
 
@@ -77,16 +77,16 @@ static bool InitWithHandle(LibHandle h)
 	if (!h)
 		return false;
 
-	auto init = reinterpret_cast<foxclip_plugin_init_fn>(ResolveSym(h, kInitSym));
+	auto init = reinterpret_cast<foxclipPluginInitFn>(ResolveSym(h, kInitSym));
 	if (!init)
 		return false;
 
-	fc_api_t api = MakeApi();
+	FoxclipApi api = MakeApi();
 	if (!init(&api))
 		return false;
 
 	// deinit は任意（存在しない実装も許容）
-	auto deinit = reinterpret_cast<foxclip_plugin_deinit_fn>(ResolveSym(h, kDeinitSym));
+	auto deinit = reinterpret_cast<foxclipPluginDeinitFn>(ResolveSym(h, kDeinitSym));
 
 	g_state.handle = h;
 	g_state.deinit = deinit;
@@ -157,7 +157,7 @@ void Unload()
 		return;
 
 	if (g_state.deinit) {
-		// プラグイン側のクリーンアップ（登録ハンドラ解除 など）
+		// プラグイン側のクリーンアップ（登録ハンドラ解除など）
 		g_state.deinit();
 	}
 

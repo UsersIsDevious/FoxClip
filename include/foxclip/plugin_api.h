@@ -4,27 +4,27 @@
 #include "foxclip/core/export.h"
 #include "foxclip/log/level.h"
 
-/* ABI */
-#define FC_API_ABI 1
+/* ABI 定義 */
+#define FOXCLIP_API_ABI 1
 
-typedef void(FC_CALL *fc_event_callback_t)(const char *event, const char *payload, void *user);
+typedef void(FOXCLIP_CALL *FoxclipEventCallback)(const char *event, const char *payload, void *user);
 
-typedef struct fc_api_v1 {
-	int abi; /* == FC_API_ABI */
-	void(FC_CALL *log_set_min_level)(fc_log_level_t);
-	void(FC_CALL *log)(fc_log_level_t, const char *tag, const char *fmt, ...);
-	void(FC_CALL *log_v)(fc_log_level_t, const char *tag, const char *fmt, va_list);
-	int(FC_CALL *register_event_handler)(const char *event, fc_event_callback_t cb, void *user);
-	int(FC_CALL *unregister_event_handler)(const char *event, fc_event_callback_t cb, void *user);
-} fc_api_v1;
+typedef struct FoxclipApiV1 {
+	int abi; /* == FOXCLIP_API_ABI */
+	void(FOXCLIP_CALL *logSetMinLevel)(FoxclipLogLevel);
+	void(FOXCLIP_CALL *log)(FoxclipLogLevel, const char *tag, const char *fmt, ...);
+	void(FOXCLIP_CALL *logVa)(FoxclipLogLevel, const char *tag, const char *fmt, va_list);
+	int(FOXCLIP_CALL *registerEventHandler)(const char *event, FoxclipEventCallback cb, void *user);
+	int(FOXCLIP_CALL *unregisterEventHandler)(const char *event, FoxclipEventCallback cb, void *user);
+} FoxclipApiV1;
 
-typedef fc_api_v1 fc_api_t;
+typedef FoxclipApiV1 FoxclipApi;
 
 /* プラグインがエクスポートすべき初期化/終了関数 */
-typedef bool(FC_CALL *foxclip_plugin_init_fn)(const fc_api_t *api);
-typedef void(FC_CALL *foxclip_plugin_deinit_fn)(void);
+typedef bool(FOXCLIP_CALL *foxclipPluginInitFn)(const FoxclipApi *api);
+typedef void(FOXCLIP_CALL *foxclipPluginDeinitFn)(void);
 
 /* vtable を使うプラグイン側の共有ポインタ（定義はプラグイン側） */
-#if defined(FC_USE_VTABLE)
-FC_EXTERN const fc_api_t *g_fc;
+#if defined(FOXCLIP_USE_VTABLE)
+FOXCLIP_EXTERN const FoxclipApi *gFoxclip;
 #endif
