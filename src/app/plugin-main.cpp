@@ -11,6 +11,19 @@
 #include "infra_shared/config/build/plugin-config.h"
 #include "infra_shared/plugin/FoxclipPluginHost.h"
 #include "infra_shared/plugin/PluginFolderLogger.h"
+#include "features/plugin_loader/app/LoaderFacade.h"
+#include "features/plugin_loader/domain/LoadTypes.h"
+
+static std::string resolvePluginsRootUtf8(const std::string &pluginDirName)
+{
+	using foxclip::infra_shared::fs::roots::ObsConfigRootProvider;
+	using foxclip::infra_shared::fs::PathResolver;
+
+	ObsConfigRootProvider root;
+	PathResolver resolver(root);
+	auto full = resolver.toFull(pluginDirName);
+	return full.value_or(std::string{});
+}
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
@@ -38,6 +51,39 @@ bool obs_module_load(void)
 	}
 
 	foxclip::infra_shared::plugin::logPluginSubfolders(pluginDirName);
+
+	// 2) 一括ロード（直下ディレクトリを列挙→検証→最初の成功まで or 全件）
+	{
+		using foxclip::plugin_loader::app::LoaderFacade;
+		using foxclip::plugin_loader::domain::LoadOptions;
+
+		const std::string pluginsRoot = resolvePluginsRootUtf8(pluginDirName);
+		if (pluginsRoot.empty()) {
+			OBS_LOG_WARN("[foxclip] plugins root resolve failed for '%s'", pluginDirName.c_str());
+		} else {
+			LoaderFacade loader;
+
+			LoadOptions opt;
+			opt.unloadBeforeLoad = true;    // 既にロード済みなら一旦 unload（Host は単一ロード想定）
+			opt.stopOnFirstSuccess = false; // ★ 全件試す。最初で止めたい場合は true
+
+			auto res = loader.loadAll(pluginsRoot, opt);
+
+			// 結果サマリ
+			OBS_LOG_INFO("[foxclip] batch load summary: %zu success, %zu errors", res.successes.size(),
+				     res.errors.size());
+
+			// 成功詳細
+			for (const auto &s : res.successes) {
+				OBS_LOG_INFO("[foxclip] loaded: %s (%s) id=%s @ %s", s.name.c_str(), s.version.c_str(),
+					     s.id.c_str(), s.modulePath.c_str());
+			}
+			// 失敗詳細
+			for (const auto &e : res.errors) {
+				OBS_LOG_WARN("[foxclip] failed: %s -- %s", e.pluginDir.c_str(), e.message.c_str());
+			}
+		}
+	}
 
 	// Tools メニューにカスタム QAction を追加
 	const char *label = obs_module_text("Tools.Menu.FoxClip");
