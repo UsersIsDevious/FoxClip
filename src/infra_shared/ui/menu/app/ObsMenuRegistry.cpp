@@ -66,7 +66,8 @@ static MenuRecord &findOrCreateMenuLocked(const MenuId &topMenuId, QMenuBar *bar
 	// 3) 無ければ作成
 	if (!found) {
 		found = new QMenu(bar);
-		found->setObjectName(QString::fromStdString(topMenuId));
+		// ループ前に作った qTopMenuId を再利用（余分な変換を回避）
+		found->setObjectName(qTopMenuId);
 		bar->addMenu(found);
 	}
 
