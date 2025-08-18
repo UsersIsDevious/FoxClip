@@ -76,6 +76,7 @@ target_sources(
     src/features/plugin_loader/app/ValidationInputFactory.cpp
     src/features/plugin_loader/domain/ManifestValidator.cpp
     src/features/plugin_loader/infrastructure/NlohmannManifestReader.cpp
+    src/features/plugin_loader/app/LoaderFacadeMulti.cpp
     src/infra_shared/fs/FsUtils.cpp
     src/infra_shared/fs/FileStore.cpp
     src/infra_shared/fs/PathResolver.cpp
@@ -83,6 +84,10 @@ target_sources(
     src/infra_shared/fs/roots/ObsConfigRootProvider.cpp
     src/infra_shared/log/ObsLogger.c
     src/infra_shared/config/path/ObsConfigPathProvider.cpp
+    src/infra_shared/plugin/ModuleLoader.cpp
+    src/infra_shared/plugin/HostApiV1.cpp
+    src/infra_shared/plugin/ThreadedPlugin.cpp
+    src/infra_shared/plugin/MultiPluginHost.cpp
     src/infra_shared/plugin/FoxclipPluginHost.cpp
     src/infra_shared/plugin/PluginFolderLogger.cpp
     src/infra_shared/startup/EnsurePluginDir.cpp
