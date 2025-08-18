@@ -11,13 +11,13 @@ extern "C" {
 /* vtable 経由でコール（プラグイン側のみ） */
 #include "foxclip/plugin_api.h"
 
-/* gFoxclip は plugin_api.h で extern 宣言。プラグイン側で定義してください。 */
+/* foxclipApi は plugin_api.h で extern 宣言。プラグイン側で定義してください。 */
 #define foxclipLogSetMinLevel(...) \
-  do { if (gFoxclip && gFoxclip->logSetMinLevel) gFoxclip->logSetMinLevel(__VA_ARGS__); } while(0)
+  do { if (foxclipApi && foxclipApi->logSetMinLevel) foxclipApi->logSetMinLevel(__VA_ARGS__); } while(0)
 #define foxclipLog(...) \
-  do { if (gFoxclip && gFoxclip->log) gFoxclip->log(__VA_ARGS__); } while(0)
+  do { if (foxclipApi && foxclipApi->log) foxclipApi->log(__VA_ARGS__); } while(0)
 #define foxclipLogVa(...) \
-  do { if (gFoxclip && gFoxclip->logVa) gFoxclip->logVa(__VA_ARGS__); } while(0)
+  do { if (foxclipApi && foxclipApi->logVa) foxclipApi->logVa(__VA_ARGS__); } while(0)
 
 #else
 /* ライブラリ直リンク時の宣言 */
