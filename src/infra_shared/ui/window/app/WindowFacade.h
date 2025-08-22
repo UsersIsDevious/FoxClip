@@ -15,7 +15,7 @@ public:
 	void showHaloWindow();
 
 private:
-	std::unique_ptr<IWindow> window_;
+	std::unique_ptr<IWindow> window;
 };
 
 } // namespace foxclip::infra_shared::ui::window

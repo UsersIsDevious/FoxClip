@@ -3,7 +3,6 @@
 
 #include <QDialog>
 #include <QString>
-#include <memory>
 #include "infra_shared/ui/window/domain/IWindow.h"
 
 class QLabel;

@@ -1,8 +1,6 @@
 // src/infra_shared/ui/window/domain/IWindow.h
 #pragma once
 
-#include <memory>
-
 namespace foxclip::infra_shared::ui::window {
 
 class IWindow {

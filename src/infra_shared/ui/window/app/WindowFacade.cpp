@@ -3,14 +3,14 @@
 
 namespace foxclip::infra_shared::ui::window {
 
-WindowFacade::WindowFacade(std::unique_ptr<IWindow> window) : window_(std::move(window)) {}
+WindowFacade::WindowFacade(std::unique_ptr<IWindow> window) : window(std::move(window)) {}
 
 WindowFacade::~WindowFacade() = default;
 
 void WindowFacade::showHaloWindow()
 {
-	if (window_) {
-		window_->show();
+	if (window) {
+		window->show();
 	}
 }
 
