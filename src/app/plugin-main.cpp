@@ -21,13 +21,13 @@ OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
 using foxclip::infra_shared::ui::window::WindowFacade;
 using foxclip::infra_shared::ui::window::QtHelloWindow;
 namespace {
-std::unique_ptr<WindowFacade> gWindowFacade; // [OK] グローバルは小さく
+std::unique_ptr<WindowFacade> windowFacade; // [OK] グローバルは小さく
 }
 
 static void onOpenHaloWindow(void *)
 {
-	if (gWindowFacade) {
-		gWindowFacade->showHaloWindow();
+	if (windowFacade) {
+		windowFacade->showHaloWindow();
 	}
 }
 
@@ -77,7 +77,7 @@ bool obs_module_load(void)
 	QWidget *main = static_cast<QWidget *>(obs_frontend_get_main_window());
 
 	auto window = std::make_unique<QtHelloWindow>(main, QStringLiteral("HaloWorld"));
-	gWindowFacade = std::make_unique<WindowFacade>(std::move(window));
+	windowFacade = std::make_unique<WindowFacade>(std::move(window));
 
 	// Tools メニューに項目追加
 	obs_frontend_add_tools_menu_item("Open Halo Window", onOpenHaloWindow, nullptr);

@@ -20,8 +20,8 @@ public:
 	void show() override; // IWindow
 
 private:
-	QLabel *label_{nullptr};
-	QVBoxLayout *layout_{nullptr};
+	QLabel *label{nullptr};
+	QVBoxLayout *layout{nullptr};
 };
 
 } // namespace foxclip::infra_shared::ui::window

@@ -12,11 +12,11 @@ QtHelloWindow::QtHelloWindow(QWidget *parent, const QString &text) : QDialog(par
 	setObjectName("fc.ui.QtHelloWindow");
 	setModal(false);
 
-	layout_ = new QVBoxLayout(this);
-	label_ = new QLabel(text, this);
-	label_->setAlignment(Qt::AlignCenter);
+	layout = new QVBoxLayout(this);
+	label = new QLabel(text, this);
+	label->setAlignment(Qt::AlignCenter);
 
-	layout_->addWidget(label_);
+	layout->addWidget(label);
 	resize(360, 160);
 }
 
