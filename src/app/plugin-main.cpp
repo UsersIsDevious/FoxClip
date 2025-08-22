@@ -12,8 +12,24 @@
 #include "infra_shared/plugin/FoxclipPluginHost.h"
 #include "infra_shared/plugin/PluginFolderLogger.h"
 
+#include "infra_shared/ui/window/app/WindowFacade.h"
+#include "infra_shared/ui/window/infrastructure/qt/QtHelloWindow.h"
+
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
+
+using foxclip::infra_shared::ui::window::WindowFacade;
+using foxclip::infra_shared::ui::window::QtHelloWindow;
+namespace {
+std::unique_ptr<WindowFacade> gWindowFacade; // [OK] グローバルは小さく
+}
+
+static void onOpenHaloWindow(void *)
+{
+	if (gWindowFacade) {
+		gWindowFacade->showHaloWindow();
+	}
+}
 
 bool obs_module_load(void)
 {
@@ -56,6 +72,17 @@ bool obs_module_load(void)
 			 []() { OBS_LOG_INFO("QAction triggered (version %s)", PLUGIN_VERSION); });
 
 	//foxclip::Host::Load("../FoxClip-sample-plugin/build/Release/foxclip-plugin.dll");
+
+	// OBS のメインウィンドウ（Qt）を親にする
+	QWidget *main = static_cast<QWidget *>(obs_frontend_get_main_window());
+
+	auto window = std::make_unique<QtHelloWindow>(main, QStringLiteral("HaloWorld"));
+	gWindowFacade = std::make_unique<WindowFacade>(std::move(window));
+
+	// Tools メニューに項目追加
+	obs_frontend_add_tools_menu_item("Open Halo Window", onOpenHaloWindow, nullptr);
+
+	blog(LOG_INFO, "foxclip: module loaded");
 
 	return true;
 }
