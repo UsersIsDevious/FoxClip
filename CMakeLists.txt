@@ -76,6 +76,7 @@ target_sources(
     src/infra_shared/fs/PathResolver.cpp
     src/infra_shared/fs/DirectoryLister.cpp
     src/infra_shared/fs/roots/ObsConfigRootProvider.cpp
+    src/infra_shared/ui/menu/app/ObsMenuRegistry.cpp
     src/infra_shared/log/ObsLogger.c
     src/infra_shared/config/path/ObsConfigPathProvider.cpp
     src/infra_shared/plugin/ModuleLoader.cpp
