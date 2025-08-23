@@ -91,7 +91,7 @@ bool obs_module_load(void)
 				     res.errors.size());
 		}
 	}
-  // ▼▼ ここからトップレベルメニューを追加 ▼▼
+	// ▼▼ ここからトップレベルメニューを追加 ▼▼
 	// ID は英数字（objectName用）、表示名は日本語
 	foxclip::ui::menu::ObsMenuRegistry::ensureTopLevelMenu(
 		/*topMenuId=*/kTestOriginalMenuId,
