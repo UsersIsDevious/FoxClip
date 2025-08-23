@@ -28,9 +28,25 @@ static std::string resolvePluginsRootUtf8(const std::string &pluginDirName)
 
 #include "infra_shared/ui/menu/app/ObsMenuRegistry.h"
 
+#include "infra_shared/ui/window/app/WindowFacade.h"
+#include "infra_shared/ui/window/infrastructure/qt/QtHelloWindow.h"
+
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
 
+using foxclip::infra_shared::ui::window::WindowFacade;
+using foxclip::infra_shared::ui::window::QtHelloWindow;
+namespace {
+std::unique_ptr<WindowFacade> windowFacade;
+QtHelloWindow *helloWindow = nullptr;
+} // namespace
+
+static void onOpenHaloWindow(void *)
+{
+	if (windowFacade) {
+		windowFacade->showHaloWindow();
+	}
+}
 // 予約識別子回避＆規約どおり kUpperCamel で定数化
 static const char *const kTestOriginalMenuId = "TestOriginal";
 static const char *const kTestOriginalActionLogId = "TestOriginal.Log";
@@ -105,6 +121,18 @@ bool obs_module_load(void)
 
 	//foxclip::Host::Load("../FoxClip-sample-plugin/build/Release/foxclip-plugin.dll");
 
+	// OBS のメインウィンドウ（Qt）を親にする
+	QWidget *main = static_cast<QWidget *>(obs_frontend_get_main_window());
+
+	helloWindow = new QtHelloWindow(main, QStringLiteral("HaloWorld"));
+	QObject::connect(helloWindow, &QObject::destroyed, [](QObject *) { helloWindow = nullptr; });
+	windowFacade = std::make_unique<WindowFacade>([]() { return helloWindow; });
+
+	// Tools メニューに項目追加
+	obs_frontend_add_tools_menu_item("Open Halo Window", onOpenHaloWindow, nullptr);
+
+	OBS_LOG_INFO("foxclip: module loaded");
+
 	return true;
 }
 
@@ -112,6 +140,11 @@ void obs_module_unload(void)
 {
 	// Unload all plugins
 	foxclip::infra_shared::plugin::MultiPluginHost::instance().stopAndUnloadAll();
+	if (helloWindow != nullptr) {
+		helloWindow->deleteLater();
+		helloWindow = nullptr;
+	}
+	windowFacade.reset();
 	// 追加: 生成した QMenu/QAction を確実に破棄
 	foxclip::ui::menu::ObsMenuRegistry::teardownAll();
 	OBS_LOG_INFO("plugin unloaded");

@@ -87,6 +87,8 @@ target_sources(
     src/infra_shared/plugin/PluginFolderLogger.cpp
     src/infra_shared/startup/EnsurePluginDir.cpp
     src/infra_shared/version/Semver.cpp
+    src/infra_shared/ui/window/app/WindowFacade.cpp
+    src/infra_shared/ui/window/infrastructure/qt/QtHelloWindow.cpp
     src/public_api/log/FoxclipLogApi.c
 )
 
