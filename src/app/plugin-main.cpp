@@ -11,9 +11,19 @@
 #include "infra_shared/config/build/plugin-config.h"
 #include "infra_shared/plugin/FoxclipPluginHost.h"
 #include "infra_shared/plugin/PluginFolderLogger.h"
+#include "infra_shared/ui/menu/app/ObsMenuRegistry.h"
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
+
+// 予約識別子回避＆規約どおり kUpperCamel で定数化
+static const char *const kTestOriginalMenuId = "TestOriginal";
+static const char *const kTestOriginalActionLogId = "TestOriginal.Log";
+
+static void onLogAction()
+{
+	OBS_LOG_INFO("Top menu action clicked (version %s)", PLUGIN_VERSION);
+}
 
 bool obs_module_load(void)
 {
@@ -39,6 +49,18 @@ bool obs_module_load(void)
 
 	foxclip::infra_shared::plugin::logPluginSubfolders(pluginDirName);
 
+	// ▼▼ ここからトップレベルメニューを追加 ▼▼
+	// ID は英数字（objectName用）、表示名は日本語
+	foxclip::ui::menu::ObsMenuRegistry::ensureTopLevelMenu(
+		/*topMenuId=*/kTestOriginalMenuId,
+		/*visibleTitle=*/QObject::tr(u8"テストオリジナルメニュー"));
+
+	// メニュー配下にクリック可能な項目を1つ追加（押されたらログ）
+	foxclip::ui::menu::ObsMenuRegistry::addMenuAction(
+		/*topMenuId=*/kTestOriginalMenuId,
+		/*props=*/foxclip::ui::menu::ActionProperties{kTestOriginalActionLogId, QObject::tr(u8"ログ出力"),
+							      onLogAction, false});
+
 	// Tools メニューにカスタム QAction を追加
 	const char *label = obs_module_text("Tools.Menu.FoxClip");
 	void *raw = obs_frontend_add_tools_menu_qaction(label);
@@ -62,5 +84,7 @@ bool obs_module_load(void)
 
 void obs_module_unload(void)
 {
+	// 追加: 生成した QMenu/QAction を確実に破棄
+	foxclip::ui::menu::ObsMenuRegistry::teardownAll();
 	OBS_LOG_INFO("plugin unloaded");
 }
