@@ -11,6 +11,21 @@
 #include "infra_shared/config/build/plugin-config.h"
 #include "infra_shared/plugin/FoxclipPluginHost.h"
 #include "infra_shared/plugin/PluginFolderLogger.h"
+#include "features/plugin_loader/app/LoaderFacadeMulti.h"
+#include "features/plugin_loader/domain/LoadTypes.h"
+#include "infra_shared/plugin/MultiPluginHost.h"
+
+static std::string resolvePluginsRootUtf8(const std::string &pluginDirName)
+{
+	using foxclip::infra_shared::fs::roots::ObsConfigRootProvider;
+	using foxclip::infra_shared::fs::PathResolver;
+
+	ObsConfigRootProvider root;
+	PathResolver resolver(root);
+	auto full = resolver.toFull(pluginDirName);
+	return full.value_or(std::string{});
+}
+
 #include "infra_shared/ui/menu/app/ObsMenuRegistry.h"
 
 #include "infra_shared/ui/window/app/WindowFacade.h"
@@ -65,6 +80,17 @@ bool obs_module_load(void)
 
 	foxclip::infra_shared::plugin::logPluginSubfolders(pluginDirName);
 
+	{
+		using foxclip::plugin_loader::app::LoaderFacadeMulti;
+
+		const std::string pluginsRoot = resolvePluginsRootUtf8(pluginDirName);
+		if (!pluginsRoot.empty()) {
+			LoaderFacadeMulti m;
+			auto res = m.loadAll(pluginsRoot);
+			OBS_LOG_INFO("[foxclip] multi-load: %zu success, %zu errors", res.successes.size(),
+				     res.errors.size());
+		}
+	}
 	// ▼▼ ここからトップレベルメニューを追加 ▼▼
 	// ID は英数字（objectName用）、表示名は日本語
 	foxclip::ui::menu::ObsMenuRegistry::ensureTopLevelMenu(
@@ -112,6 +138,8 @@ bool obs_module_load(void)
 
 void obs_module_unload(void)
 {
+	// Unload all plugins
+	foxclip::infra_shared::plugin::MultiPluginHost::instance().stopAndUnloadAll();
 	if (helloWindow != nullptr) {
 		helloWindow->deleteLater();
 		helloWindow = nullptr;

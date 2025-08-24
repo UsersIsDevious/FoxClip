@@ -36,6 +36,16 @@ if(ENABLE_QT)
   )
 endif()
 
+# ==== nlohmann/json ====
+option(FOXCLIP_FETCH_NLOHMANN_JSON "Fetch nlohmann/json via FetchContent" ON)
+
+if(FOXCLIP_FETCH_NLOHMANN_JSON)
+  include(FetchContent)
+  FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+  FetchContent_MakeAvailable(nlohmann_json)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+endif()
+
 # ===== plugin-config.c を生成（.in を直接ビルドに入れない）=====
 set(GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 file(MAKE_DIRECTORY "${GEN_DIR}")
@@ -56,6 +66,11 @@ target_sources(
     src/features/startup_check/domain/StartupCheckService.cpp
     src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
     src/features/startup_check/infrastructure/StdFsDirectoryCreator.cpp
+    src/features/plugin_loader/app/LoaderFacade.cpp
+    src/features/plugin_loader/app/ValidationInputFactory.cpp
+    src/features/plugin_loader/domain/ManifestValidator.cpp
+    src/features/plugin_loader/infrastructure/NlohmannManifestReader.cpp
+    src/features/plugin_loader/app/LoaderFacadeMulti.cpp
     src/infra_shared/fs/FsUtils.cpp
     src/infra_shared/fs/FileStore.cpp
     src/infra_shared/fs/PathResolver.cpp
@@ -64,9 +79,14 @@ target_sources(
     src/infra_shared/ui/menu/app/ObsMenuRegistry.cpp
     src/infra_shared/log/ObsLogger.c
     src/infra_shared/config/path/ObsConfigPathProvider.cpp
+    src/infra_shared/plugin/ModuleLoader.cpp
+    src/infra_shared/plugin/HostApiV1.cpp
+    src/infra_shared/plugin/ThreadedPlugin.cpp
+    src/infra_shared/plugin/MultiPluginHost.cpp
     src/infra_shared/plugin/FoxclipPluginHost.cpp
     src/infra_shared/plugin/PluginFolderLogger.cpp
     src/infra_shared/startup/EnsurePluginDir.cpp
+    src/infra_shared/version/Semver.cpp
     src/infra_shared/ui/window/app/WindowFacade.cpp
     src/infra_shared/ui/window/infrastructure/qt/QtHelloWindow.cpp
     src/public_api/log/FoxclipLogApi.c
