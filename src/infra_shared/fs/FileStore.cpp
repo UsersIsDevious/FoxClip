@@ -28,9 +28,7 @@ bool FileStore::ensureDirectory(const std::string &relativeDirectory, std::error
 		return false;
 
 	// 既に存在するか確認
-	return createDirs(
-		full,
-		ec); 
+	return createDirs(full, ec);
 }
 
 bool FileStore::writeText(const std::string &relativePath, const std::string &utf8Content, std::error_code &ec)
