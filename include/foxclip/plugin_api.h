@@ -21,6 +21,12 @@ typedef struct FoxclipApiV1 {
 	int(FOXCLIP_CALL *unregisterEventHandler)(const char *event, FoxclipEventCallback cb, void *user);
 
 	FoxclipRecordStartFn recordStart; /* 録画開始関数 */
+
+	/* UI Menu API */
+	int(FOXCLIP_CALL *createMenu)(const char *menuId, const char *title);
+	int(FOXCLIP_CALL *addMenuItem)(const char *menuId, const struct FoxclipMenuItem *item);
+	int(FOXCLIP_CALL *removeMenu)(const char *menuId);
+	int(FOXCLIP_CALL *addToolsMenuItem)(const char *title, void *callback, void *userData);
 } FoxclipApiV1;
 
 typedef FoxclipApiV1 FoxclipApi;

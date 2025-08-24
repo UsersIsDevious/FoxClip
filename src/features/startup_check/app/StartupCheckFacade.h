@@ -2,6 +2,8 @@
 #include "features/startup_check/domain/StartupCheckService.h"
 #include "features/startup_check/infrastructure/StdFsDirectoryChecker.h"
 #include "features/startup_check/infrastructure/StdFsDirectoryCreator.h"
+#include "StartupCheckService.h"
+#include <memory>
 
 namespace foxclip::startup_check::app {
 
@@ -13,7 +15,7 @@ public:
 private:
 	std::unique_ptr<foxclip::startup_check::domain::IDirectoryChecker> dirChecker;
 	foxclip::startup_check::infrastructure::StdFsDirectoryCreator creator;
-	std::unique_ptr<foxclip::startup_check::domain::StartupCheckService> service;
+	std::unique_ptr<StartupCheckService> service;
 };
 
 } // namespace foxclip::startup_check::app

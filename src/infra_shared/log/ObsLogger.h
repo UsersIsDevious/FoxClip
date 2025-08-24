@@ -18,9 +18,9 @@ extern "C" {
 void obs_log(int log_level, const char *format, ...);
 
 // 便利マクロ
-#define OBS_LOG_INFO(...)  obs_log(LOG_INFO, __VA_ARGS__)
-#define OBS_LOG_WARN(...)  obs_log(LOG_WARNING, __VA_ARGS__)
-#define OBS_LOG_ERROR(...) obs_log(LOG_ERROR, __VA_ARGS__)
+#define OBS_LOG_INFO(format, ...)  obs_log(LOG_INFO, format, ##__VA_ARGS__)
+#define OBS_LOG_WARN(format, ...)  obs_log(LOG_WARNING, format, ##__VA_ARGS__)
+#define OBS_LOG_ERROR(format, ...) obs_log(LOG_ERROR, format, ##__VA_ARGS__)
 
 #ifdef __cplusplus
 }

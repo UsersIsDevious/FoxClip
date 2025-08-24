@@ -1,4 +1,5 @@
 #include "StartupCheckFacade.h"
+#include "StartupCheckService.h"
 #include "infra_shared/log/ObsLogger.h"
 #include "infra_shared/startup/EnsurePluginDir.h"
 #include <memory>
@@ -15,12 +16,12 @@ StartupCheckFacade::StartupCheckFacade(std::unique_ptr<domain::IDirectoryChecker
 
 	if (er.ok && !er.fullPath.empty()) {
 		// StartupCheckService へは「requiredName=フルパス」「basePath=""」で渡す
-		service = std::make_unique<domain::StartupCheckService>(
+		service = std::make_unique<StartupCheckService>(
 			*dirChecker.get(), domain::DirectoryPolicy{er.fullPath}, "", creator);
 		OBS_LOG_INFO("[foxclip] using OBS config dir: %s", er.fullPath.c_str());
 	} else {
 		// フォールバック（相対パスで '.' / 実際の作成は service.run() に委ねる）
-		service = std::make_unique<domain::StartupCheckService>(
+		service = std::make_unique<StartupCheckService>(
 			*dirChecker.get(), domain::DirectoryPolicy{requiredName}, ".", creator);
 
 		const std::string errorMsg = er.errorMessage.empty() ? "failed to ensure obs dir" : er.errorMessage;

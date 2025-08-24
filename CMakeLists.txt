@@ -62,34 +62,46 @@ target_sources(
   PRIVATE
     ${PLUGIN_CONFIG_OUT}
     src/app/plugin-main.cpp
-    src/features/startup_check/app/StartupCheckFacade.cpp
-    src/features/startup_check/domain/StartupCheckService.cpp
-    src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
-    src/features/startup_check/infrastructure/StdFsDirectoryCreator.cpp
+    src/features/plugin_host/app/PluginHostFacade.cpp
+    src/features/plugin_host/infrastructure/DynamicPluginHost.cpp
+    src/features/plugin_host/infrastructure/FoxclipPluginHost.cpp
+    src/features/plugin_host/infrastructure/MultiPluginHostImpl.cpp
     src/features/plugin_loader/app/LoaderFacade.cpp
+    src/features/plugin_loader/app/LoaderFacadeMulti.cpp
     src/features/plugin_loader/app/ValidationInputFactory.cpp
     src/features/plugin_loader/domain/ManifestValidator.cpp
     src/features/plugin_loader/infrastructure/NlohmannManifestReader.cpp
-    src/features/plugin_loader/app/LoaderFacadeMulti.cpp
-    src/infra_shared/fs/FsUtils.cpp
-    src/infra_shared/fs/FileStore.cpp
-    src/infra_shared/fs/PathResolver.cpp
-    src/infra_shared/fs/DirectoryLister.cpp
-    src/infra_shared/fs/roots/ObsConfigRootProvider.cpp
-    src/infra_shared/ui/menu/app/ObsMenuRegistry.cpp
-    src/infra_shared/log/ObsLogger.c
+    src/features/startup_check/app/StartupCheckFacade.cpp
+    src/features/startup_check/app/StartupCheckService.cpp
+    src/features/startup_check/infrastructure/EnsurePluginDir.cpp
+    src/features/startup_check/infrastructure/StdFsDirectoryChecker.cpp
+    src/features/startup_check/infrastructure/StdFsDirectoryCreator.cpp
     src/infra_shared/config/path/ObsConfigPathProvider.cpp
-    src/infra_shared/plugin/ModuleLoader.cpp
-    src/infra_shared/plugin/HostApiV1.cpp
-    src/infra_shared/plugin/ThreadedPlugin.cpp
-    src/infra_shared/plugin/MultiPluginHost.cpp
+    src/infra_shared/fs/DirectoryLister.cpp
+    src/infra_shared/fs/FileStore.cpp
+    src/infra_shared/fs/FsUtils.cpp
+    src/infra_shared/fs/PathResolver.cpp
+    src/infra_shared/fs/domain/Path.cpp
+    src/infra_shared/fs/roots/ObsConfigRootProvider.cpp
     src/infra_shared/plugin/FoxclipPluginHost.cpp
+    src/infra_shared/plugin/HostApiV1.cpp
+    src/infra_shared/plugin/ModuleLoader.cpp
+    src/infra_shared/plugin/MultiPluginHost.cpp
     src/infra_shared/plugin/PluginFolderLogger.cpp
+    src/infra_shared/plugin/ThreadedPlugin.cpp
     src/infra_shared/startup/EnsurePluginDir.cpp
-    src/infra_shared/version/Semver.cpp
+    src/infra_shared/ui/core/app/UiCoordinator.cpp
+    src/infra_shared/ui/menu/app/ObsMenuRegistry.cpp
     src/infra_shared/ui/window/app/WindowFacade.cpp
     src/infra_shared/ui/window/infrastructure/qt/QtHelloWindow.cpp
+    src/infra_shared/version/Semver.cpp
+    src/infra_shared/version/domain/Semver.cpp
+    src/infra_shared/log/ObsLogger.c
+    src/infra_shared/log/app/LogService.cpp
+    src/infra_shared/log/infrastructure/ObsLoggerImpl.cpp
     src/public_api/log/FoxclipLogApi.c
+    src/public_api/recorder/FoxclipRecorderApi.c
+    src/public_api/ui/FoxclipMenuApi.cpp
 )
 
 target_include_directories(

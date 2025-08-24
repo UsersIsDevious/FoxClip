@@ -2,10 +2,10 @@
 #include "StartupCheckService.h"
 #include "infra_shared/log/ObsLogger.h"
 
-namespace foxclip::startup_check::domain {
+namespace foxclip::startup_check::app {
 
-StartupCheckService::StartupCheckService(const IDirectoryChecker &checker, DirectoryPolicy policy, std::string basePath,
-					 DirectoryCreator &creator)
+StartupCheckService::StartupCheckService(const domain::IDirectoryChecker &checker, domain::DirectoryPolicy policy, std::string basePath,
+					 domain::IDirectoryCreator &creator)
 	: checker(checker),
 	  policy(std::move(policy)),
 	  basePath(std::move(basePath)),
@@ -13,7 +13,7 @@ StartupCheckService::StartupCheckService(const IDirectoryChecker &checker, Direc
 {
 }
 
-Result StartupCheckService::run()
+domain::Result StartupCheckService::run()
 {
 	// basePath_ が空なら requiredName を「そのままフルパス」として扱う
 	std::filesystem::path targetPath = basePath.empty() ? std::filesystem::path(policy.requiredName)
@@ -25,7 +25,7 @@ Result StartupCheckService::run()
 
 	if (!&checker) {
 		OBS_LOG_ERROR("[StartupCheckService] IDirectoryChecker is null");
-		return Result::failure("IDirectoryChecker is null");
+		return domain::Result::failure("IDirectoryChecker is null");
 	}
 
 	OBS_LOG_INFO("[StartupCheckService] Checking if directory exists: '%s'", target.c_str());
@@ -38,10 +38,10 @@ Result StartupCheckService::run()
 		if (!ok) {
 			OBS_LOG_ERROR("[StartupCheckService] Directory creation failed for '%s'", target.c_str());
 			if (ec) {
-				return Result::failure("必須ディレクトリ '" + policy.requiredName +
+				return domain::Result::failure("必須ディレクトリ '" + policy.requiredName +
 						       "' の作成に失敗: " + ec.message());
 			}
-			return Result::failure("必須ディレクトリ '" + policy.requiredName + "' の作成に失敗");
+			return domain::Result::failure("必須ディレクトリ '" + policy.requiredName + "' の作成に失敗");
 		}
 
 		OBS_LOG_INFO("[StartupCheckService] Directory creation succeeded, verifying: '%s'", target.c_str());
@@ -49,14 +49,14 @@ Result StartupCheckService::run()
 		if (!checker.existsDir(target)) {
 			OBS_LOG_ERROR("[StartupCheckService] Directory verification failed after creation: '%s'",
 				      target.c_str());
-			return Result::failure("必須ディレクトリ '" + policy.requiredName +
+			return domain::Result::failure("必須ディレクトリ '" + policy.requiredName +
 					       "' を作成後に確認できませんでした");
 		}
 		OBS_LOG_INFO("[StartupCheckService] Directory successfully created and verified: '%s'", target.c_str());
-		return Result::success("必須ディレクトリ '" + policy.requiredName + "' を新規作成しました");
+		return domain::Result::success("必須ディレクトリ '" + policy.requiredName + "' を新規作成しました");
 	}
 	OBS_LOG_INFO("[StartupCheckService] Directory already exists: '%s'", target.c_str());
-	return Result::success("必須ディレクトリ '" + policy.requiredName + "' が存在します");
+	return domain::Result::success("必須ディレクトリ '" + policy.requiredName + "' が存在します");
 }
 
-} // namespace foxclip::startup_check::domain
+} // namespace foxclip::startup_check::app

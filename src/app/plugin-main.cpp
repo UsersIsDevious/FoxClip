@@ -8,6 +8,8 @@
 #include "infra_shared/fs/roots/ObsConfigRootProvider.h"
 #include "infra_shared/fs/PathResolver.h"
 #include "infra_shared/log/ObsLogger.h"
+#include "infra_shared/log/app/LogService.h"
+#include "infra_shared/log/infrastructure/ObsLoggerImpl.h"
 #include "infra_shared/config/build/plugin-config.h"
 #include "infra_shared/plugin/FoxclipPluginHost.h"
 #include "infra_shared/plugin/PluginFolderLogger.h"
@@ -58,6 +60,13 @@ static void onLogAction()
 
 bool obs_module_load(void)
 {
+	// Initialize logging system
+	using foxclip::infra_shared::log::app::LogService;
+	using foxclip::infra_shared::log::infrastructure::ObsLoggerImpl;
+	
+	auto logger = std::make_unique<ObsLoggerImpl>();
+	LogService::initialize(std::move(logger));
+	
 	// loding message
 	OBS_LOG_INFO("plugin loaded successfully (version %s)", PLUGIN_VERSION);
 
