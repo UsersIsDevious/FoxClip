@@ -9,7 +9,7 @@ namespace foxclip::infra_shared::fs {
 // 例外は投げず、アクセス不能などは空ベクタを返す。
 class DirectoryLister {
 public:
-	static std::vector<std::filesystem::path> listSubdirectories(const std::filesystem::path &root);
+	static std::vector<std::filesystem::path> listSubDirectories(const std::filesystem::path &root);
 };
 
 } // namespace foxclip::infra_shared::fs

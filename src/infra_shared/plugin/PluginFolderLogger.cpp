@@ -25,7 +25,7 @@ void logPluginSubfolders(const std::string &pluginDirName)
 	}
 
 	const std::filesystem::path rootPath{*fullOpt};
-	const auto subs = DirectoryLister::listSubdirectories(rootPath);
+	const auto subs = DirectoryLister::listSubDirectories(rootPath);
 
 	OBS_LOG_INFO("[foxclip] Plugin folder listing: %s", fullOpt->c_str());
 	if (subs.empty()) {
