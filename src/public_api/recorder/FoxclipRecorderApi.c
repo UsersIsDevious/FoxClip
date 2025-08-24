@@ -1,5 +1,6 @@
-#include "foxclip/recorder/start.h"
+#include "foxclip/recording/start.h"
 #include "foxclip/plugin_api.h"
+#include <string.h>
 
 int FOXCLIP_CALL foxclipRecordStart(const FoxclipRecorderStartOptions *opts)
 {
@@ -15,8 +16,8 @@ int FOXCLIP_CALL foxclipRecordStart(const FoxclipRecorderStartOptions *opts)
 		size_t n = opts->size;
 		if (n > sizeof(FoxclipRecorderStartOptions))
 			n = sizeof(FoxclipRecorderStartOptions);
-		/* 安全な逐次コピー（memcpyでもOK。ここは明示的に） */
-		local = *opts; /* C の単純代入はサイズ一致前提だが、必要ならmemcpyに置換 */
+		/* 安全な逐次コピー: size に基づいて必要な分だけコピー */
+		memcpy(&local, opts, n);
 	}
 	return foxclipApi->recordStart(&local);
 #else

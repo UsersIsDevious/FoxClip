@@ -6,7 +6,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdbool.h>
 #include "foxclip/core/export.h"
-#include "foxclip/recorder/error.h"
+#include "foxclip/recording/error.h"
 
 /* 将来拡張のためのフラグ */
 typedef enum FoxclipRecorderStartFlags {
