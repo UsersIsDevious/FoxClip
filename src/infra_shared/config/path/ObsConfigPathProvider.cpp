@@ -14,7 +14,8 @@ public:
 		const char *arg = subdir.empty() ? nullptr : subdir.c_str();
 		char *raw = obs_module_config_path(arg);
 		if (!raw) {
-			OBS_LOG_ERROR("[ObsConfigPathProvider] obs_module_config_path returned null for subdir: '%s'", subdir.c_str());
+			OBS_LOG_ERROR("[ObsConfigPathProvider] obs_module_config_path returned null for subdir: '%s'",
+				      subdir.c_str());
 			return {};
 		}
 		std::string path(raw);
