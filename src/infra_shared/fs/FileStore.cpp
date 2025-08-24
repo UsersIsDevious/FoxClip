@@ -18,26 +18,26 @@ bool FileStore::resolvePath(const std::string &rel, std::string &full, std::erro
 	return false;
 }
 
-bool FileStore::ensureDir(const std::string &relDir, std::error_code &ec)
+bool FileStore::ensureDirectory(const std::string &relativeDirectory, std::error_code &ec)
 {
 	ec.clear();
 
 	// パス解決
 	std::string full;
-	if (!resolvePath(relDir, full, ec))
+	if (!resolvePath(relativeDirectory, full, ec))
 		return false;
 
 	// 既に存在するか確認
 	return createDirs(full, ec);
 }
 
-bool FileStore::writeText(const std::string &rel, const std::string &utf8, std::error_code &ec)
+bool FileStore::writeText(const std::string &relativePath, const std::string &utf8Content, std::error_code &ec)
 {
 	ec.clear();
 
 	// パス解決
 	std::string full;
-	if (!resolvePath(rel, full, ec))
+	if (!resolvePath(relativePath, full, ec))
 		return false;
 
 	// 既に存在する場合は何もしない
@@ -54,7 +54,7 @@ bool FileStore::writeText(const std::string &rel, const std::string &utf8, std::
 	}
 
 	// 書き込み
-	ofs.write(utf8.data(), static_cast<std::streamsize>(utf8.size()));
+	ofs.write(utf8Content.data(), static_cast<std::streamsize>(utf8Content.size()));
 	if (!ofs.good()) {
 		// 書き込み途中のエラー（ディスクフルなど）
 		ec = std::make_error_code(std::errc::io_error);
@@ -70,13 +70,13 @@ bool FileStore::writeText(const std::string &rel, const std::string &utf8, std::
 	return true;
 }
 
-bool FileStore::readText(const std::string &rel, std::string &out, std::error_code &ec) const
+bool FileStore::readText(const std::string &relativePath, std::string &output, std::error_code &ec) const
 {
 	ec.clear();
 
 	// パス解決
 	std::string full;
-	if (!resolvePath(rel, full, ec))
+	if (!resolvePath(relativePath, full, ec))
 		return false;
 
 	// ファイルを開く
@@ -92,10 +92,11 @@ bool FileStore::readText(const std::string &rel, std::string &out, std::error_co
 	std::error_code fec;
 	auto sz = stdfs::file_size(full, fec);
 	if (!fec && sz > 0)
-		out.reserve(static_cast<size_t>(sz));
+		output.reserve(static_cast<size_t>(sz));
 
-	// ファイルの内容を読み込む
-	out.assign((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+	// 内容を文字列として読み込み
+	output.assign(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
+
 	// 読み込みに失敗した場合はエラーコードを設定
 	// eof() は正常な終了なので、good() でチェック
 	if (!ifs.good() && !ifs.eof()) {
@@ -106,12 +107,12 @@ bool FileStore::readText(const std::string &rel, std::string &out, std::error_co
 	return true;
 }
 
-bool FileStore::exists(const std::string &rel, std::error_code &ec) const
+bool FileStore::exists(const std::string &relativePath, std::error_code &ec) const
 {
 	ec.clear();
 
 	std::string full;
-	if (!resolvePath(rel, full, ec))
+	if (!resolvePath(relativePath, full, ec))
 		return false;
 
 	return stdfs::exists(full, ec);

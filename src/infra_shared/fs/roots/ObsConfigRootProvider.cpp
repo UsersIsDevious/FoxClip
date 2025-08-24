@@ -9,7 +9,7 @@ using foxclip::infra_shared::config::path::IConfigPathProvider;
 ObsConfigRootProvider::ObsConfigRootProvider(std::shared_ptr<IConfigPathProvider> provider)
 	: pathProvider(provider ? std::move(provider) : makeObsConfigPathProvider())
 {
-	// 本体
+	// コンストラクタ本体
 }
 
 std::string ObsConfigRootProvider::root()

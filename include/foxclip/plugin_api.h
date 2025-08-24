@@ -7,7 +7,10 @@
 /* ABI 定義 */
 #define FOXCLIP_API_ABI 1
 
+// ログ出力
 typedef void(FOXCLIP_CALL *FoxclipEventCallback)(const char *event, const char *payload, void *user);
+// 録画開始
+typedef int(FOXCLIP_CALL *FoxclipRecordStartFn)(const struct FoxclipRecorderStartOptions *opts);
 
 typedef struct FoxclipApiV1 {
 	int abi; /* == FOXCLIP_API_ABI */
@@ -16,6 +19,8 @@ typedef struct FoxclipApiV1 {
 	void(FOXCLIP_CALL *logVa)(FoxclipLogLevel, const char *tag, const char *fmt, va_list);
 	int(FOXCLIP_CALL *registerEventHandler)(const char *event, FoxclipEventCallback cb, void *user);
 	int(FOXCLIP_CALL *unregisterEventHandler)(const char *event, FoxclipEventCallback cb, void *user);
+
+	FoxclipRecordStartFn recordStart; /* 録画開始関数 */
 } FoxclipApiV1;
 
 typedef FoxclipApiV1 FoxclipApi;
